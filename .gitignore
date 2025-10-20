@@ -1,0 +1,36 @@
+# Composer
+/vendor/
+composer.lock
+
+# WordPress
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+debug.log
+
+# Environment files
+.env
+.env.local
+
+# Build files
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

@@ -1,0 +1,11 @@
+.git
+.claude
+node_modules
+vendor
+.gitignore
+create-release.bat
+exclude-from-zip.txt
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Todd/Projects/wp-plugins/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
