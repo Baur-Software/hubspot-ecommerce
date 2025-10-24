@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          tools: composer
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd wordpress && npm ci && composer install --no-dev --optimize-autoloader
+          cd ../hubspot-app && npm ci
+
+      - name: Update version in plugin file
+        run: |
+          # Update version in main plugin file
+          sed -i "s/\* Version: .*/\* Version: ${{ steps.get_version.outputs.VERSION }}/" wordpress/hubspot-ecommerce.php
+          sed -i "s/define( 'HUBSPOT_ECOMMERCE_VERSION', '.*' );/define( 'HUBSPOT_ECOMMERCE_VERSION', '${{ steps.get_version.outputs.VERSION }}' );/" wordpress/hubspot-ecommerce.php
+
+      - name: Build plugin
+        run: |
+          # Create build directory
+          mkdir -p build/hubspot-ecommerce
+
+          # Copy WordPress plugin files
+          cp -r wordpress/* build/hubspot-ecommerce/
+
+          # Copy HubSpot app (if needed in release)
+          # cp -r hubspot-app build/hubspot-ecommerce/hubspot-app
+
+          # Copy root config files (if they should be in the release)
+          # cp hubspot.config.yml build/hubspot-ecommerce/
+          # cp README.md build/hubspot-ecommerce/
+
+          # Remove excluded files based on exclude-from-zip.txt
+          cd build/hubspot-ecommerce
+          if [ -f exclude-from-zip.txt ]; then
+            while IFS= read -r pattern; do
+              # Skip empty lines and comments
+              [[ -z "$pattern" || "$pattern" =~ ^# ]] && continue
+              echo "Removing: $pattern"
+              rm -rf $pattern || true
+            done < exclude-from-zip.txt
+            rm exclude-from-zip.txt
+          fi
+
+          # Verify plugin structure
+          echo "=== Plugin Structure ==="
+          ls -la
+          echo "=== Plugin Header ==="
+          head -20 hubspot-ecommerce.php
+
+      - name: Create ZIP archive
+        run: |
+          cd build
+          zip -r ../hubspot-ecommerce-${{ steps.get_version.outputs.VERSION }}.zip hubspot-ecommerce/
+          cd ..
+
+          # Generate SHA256 checksum
+          sha256sum hubspot-ecommerce-${{ steps.get_version.outputs.VERSION }}.zip > hubspot-ecommerce-${{ steps.get_version.outputs.VERSION }}.zip.sha256
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            hubspot-ecommerce-${{ steps.get_version.outputs.VERSION }}.zip
+            hubspot-ecommerce-${{ steps.get_version.outputs.VERSION }}.zip.sha256
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: hubspot-ecommerce-plugin
+          path: hubspot-ecommerce-${{ steps.get_version.outputs.VERSION }}.zip
+          retention-days: 30

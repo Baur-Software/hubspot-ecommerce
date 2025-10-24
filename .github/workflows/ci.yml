@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-wordpress:
+    name: Test WordPress Plugin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd wordpress && npm ci
+
+      - name: Install Playwright browsers
+        run: cd wordpress && npx playwright install --with-deps
+
+      - name: Run WordPress tests (no WP required)
+        run: cd wordpress && npm run test:no-wp
+
+  test-hubspot-app:
+    name: Test HubSpot App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd hubspot-app && npm ci
+
+      - name: Run HubSpot app tests
+        run: cd hubspot-app && npm test
+        continue-on-error: true  # Continue even if tests fail (until tests are implemented)
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting (if configured)
+        run: npm run lint || echo "No lint script configured"
+        continue-on-error: true
+
+  validate-structure:
+    name: Validate Plugin Structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          test -f wordpress/hubspot-ecommerce.php || exit 1
+          test -f wordpress/composer.json || exit 1
+          test -f wordpress/README.md || exit 1
+          test -f hubspot.config.yml || exit 1
+          echo "All required files present"
+
+      - name: Validate plugin header
+        run: |
+          grep -q "Plugin Name:" wordpress/hubspot-ecommerce.php || exit 1
+          grep -q "Version:" wordpress/hubspot-ecommerce.php || exit 1
+          echo "Plugin header valid"

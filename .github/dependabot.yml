@@ -1,0 +1,76 @@
+version: 2
+updates:
+  # Enable version updates for npm (WordPress plugin)
+  - package-ecosystem: "npm"
+    directory: "/wordpress"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "baursoftware"
+    labels:
+      - "dependencies"
+      - "wordpress"
+    commit-message:
+      prefix: "deps(wordpress)"
+
+  # Enable version updates for npm (HubSpot app)
+  - package-ecosystem: "npm"
+    directory: "/hubspot-app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "baursoftware"
+    labels:
+      - "dependencies"
+      - "hubspot-app"
+    commit-message:
+      prefix: "deps(hubspot-app)"
+
+  # Enable version updates for npm (root)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "baursoftware"
+    labels:
+      - "dependencies"
+      - "monorepo"
+    commit-message:
+      prefix: "deps(root)"
+
+  # Enable version updates for composer
+  - package-ecosystem: "composer"
+    directory: "/wordpress"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "baursoftware"
+    labels:
+      - "dependencies"
+      - "php"
+    commit-message:
+      prefix: "deps(composer)"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "baursoftware"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "deps(actions)"
