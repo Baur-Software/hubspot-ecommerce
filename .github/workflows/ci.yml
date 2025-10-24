@@ -89,7 +89,7 @@ jobs:
           test -f wordpress/hubspot-ecommerce.php || exit 1
           test -f wordpress/composer.json || exit 1
           test -f wordpress/README.md || exit 1
-          test -f hubspot.config.yml || exit 1
+          test -f package.json || exit 1
           echo "All required files present"
 
       - name: Validate plugin header
