@@ -32,7 +32,7 @@ class HubSpot_Ecommerce_Checkout {
     }
 
     /**
-     * Process checkout and create deal in HubSpot
+     * Process checkout - routes to appropriate payment method based on license tier
      */
     public function process_checkout($customer_data, $billing_data) {
         // Validate cart
@@ -47,13 +47,78 @@ class HubSpot_Ecommerce_Checkout {
             return $contact_id;
         }
 
-        // Create deal in HubSpot
+        // Check license tier to determine payment method
+        $license = HubSpot_Ecommerce_License_Manager::instance();
+
+        if ($license->can_use_invoices()) {
+            // PRO TIER: Use HubSpot Payments (Invoice API)
+            return $this->process_checkout_with_hubspot_payments($contact_id, $customer_data, $billing_data);
+        } else {
+            // FREE TIER: Use custom payment gateway (via hooks)
+            return $this->process_checkout_with_custom_payment($contact_id, $customer_data, $billing_data);
+        }
+    }
+
+    /**
+     * Process checkout with HubSpot Payments (Pro feature)
+     * Creates invoice and returns HubSpot payment link
+     */
+    private function process_checkout_with_hubspot_payments($contact_id, $customer_data, $billing_data) {
+        // Create HubSpot invoice
+        $invoice_manager = HubSpot_Ecommerce_Invoice_Manager::instance();
+        $invoice = $invoice_manager->create_invoice_from_cart($contact_id, $billing_data);
+
+        if (is_wp_error($invoice)) {
+            return $invoice;
+        }
+
+        // Get HubSpot payment link
+        $payment_url = $this->api->get_invoice_payment_link($invoice['id']);
+
+        if (is_wp_error($payment_url) || empty($payment_url)) {
+            return new WP_Error('no_payment_url', __('Failed to get payment URL from HubSpot', 'hubspot-ecommerce'));
+        }
+
+        // Create order post
+        $order_id = $this->create_order_post_for_invoice(
+            $invoice['id'],
+            $customer_data,
+            $billing_data,
+            'pending'
+        );
+
+        if (is_wp_error($order_id)) {
+            return $order_id;
+        }
+
+        // Clear cart
+        $this->cart->clear_cart();
+
+        do_action('hubspot_ecommerce_checkout_processed', $order_id, $invoice['id']);
+
+        return [
+            'success' => true,
+            'order_id' => $order_id,
+            'invoice_id' => $invoice['id'],
+            'payment_url' => $payment_url,
+            'payment_method' => 'hubspot',
+            'message' => __('Order created! Redirecting to payment...', 'hubspot-ecommerce'),
+        ];
+    }
+
+    /**
+     * Process checkout with custom payment gateway (Free tier)
+     * Creates deal and fires hook for custom payment integration
+     */
+    private function process_checkout_with_custom_payment($contact_id, $customer_data, $billing_data) {
+        // Create deal in HubSpot (not invoice)
         $deal_id = $this->create_deal($contact_id, $billing_data);
         if (is_wp_error($deal_id)) {
             return $deal_id;
         }
 
         // Add line items to deal
+        $cart_items = $this->cart->get_cart_items_with_products();
         $line_items_result = $this->add_line_items_to_deal($deal_id, $cart_items);
         if (is_wp_error($line_items_result)) {
             return $line_items_result;
@@ -65,15 +130,46 @@ class HubSpot_Ecommerce_Checkout {
             return $order_id;
         }
 
+        // Calculate total
+        $total = $this->cart->get_total();
+
+        // Fire payment hook - user can provide custom payment URL (Stripe, PayPal, etc.)
+        $payment_url = apply_filters(
+            'hubspot_ecommerce_payment_url',
+            '',
+            $order_id,
+            $total,
+            $customer_data,
+            $billing_data
+        );
+
         // Clear cart
         $this->cart->clear_cart();
 
         do_action('hubspot_ecommerce_order_created', $order_id, $deal_id);
 
+        if (empty($payment_url)) {
+            // No payment gateway configured - return success but with manual payment message
+            return [
+                'success' => true,
+                'order_id' => $order_id,
+                'deal_id' => $deal_id,
+                'payment_url' => null,
+                'payment_method' => 'manual',
+                'message' => __(
+                    'Order created successfully! Please configure a payment gateway or mark the order as paid manually.',
+                    'hubspot-ecommerce'
+                ),
+            ];
+        }
+
         return [
+            'success' => true,
             'order_id' => $order_id,
             'deal_id' => $deal_id,
-            'contact_id' => $contact_id,
+            'payment_url' => $payment_url,
+            'payment_method' => 'custom',
+            'message' => __('Order created! Redirecting to payment...', 'hubspot-ecommerce'),
         ];
     }
 
@@ -140,10 +236,9 @@ class HubSpot_Ecommerce_Checkout {
             'closedate' => date('Y-m-d'),
         ];
 
-        // Add billing notes
-        if (!empty($billing_data['notes'])) {
-            $properties['notes'] = sanitize_textarea_field($billing_data['notes']);
-        }
+        // Note: Order notes from customers are stored in the order metadata
+        // and can be synced to HubSpot as a note/engagement if needed
+        // Standard deals don't have a 'notes' property
 
         // Create deal with association to contact
         $associations = [

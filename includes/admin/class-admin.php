@@ -23,10 +23,117 @@ class HubSpot_Ecommerce_Admin {
     private function __construct() {
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
+        add_action('admin_notices', [$this, 'show_missing_pages_notice']);
 
         // Add sync button to products admin
         add_filter('post_row_actions', [$this, 'add_sync_action'], 10, 2);
         add_action('admin_action_sync_hubspot_product', [$this, 'handle_sync_product_action']);
+    }
+
+    /**
+     * Check if required pages are missing
+     */
+    private function get_missing_pages() {
+        $required_pages = [
+            'hubspot_ecommerce_shop_page' => 'Shop',
+            'hubspot_ecommerce_cart_page' => 'Cart',
+            'hubspot_ecommerce_checkout_page' => 'Checkout',
+            'hubspot_ecommerce_account_page' => 'My Account',
+        ];
+
+        $missing = [];
+        foreach ($required_pages as $option_name => $page_title) {
+            $page_id = get_option($option_name);
+            if (!$page_id || get_post_status($page_id) !== 'publish') {
+                $missing[$option_name] = $page_title;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Show admin notice for missing pages
+     */
+    public function show_missing_pages_notice() {
+        // Only show on HubSpot admin pages
+        $screen = get_current_screen();
+        if (!$screen || strpos($screen->id, 'hubspot-ecommerce') === false) {
+            return;
+        }
+
+        // Don't show if user dismissed it
+        if (get_option('hubspot_ecommerce_pages_notice_dismissed')) {
+            return;
+        }
+
+        $missing_pages = $this->get_missing_pages();
+        if (empty($missing_pages)) {
+            return;
+        }
+
+        ?>
+        <div class="notice notice-warning is-dismissible" id="hubspot-missing-pages-notice">
+            <p>
+                <strong><?php _e('HubSpot Ecommerce:', 'hubspot-ecommerce'); ?></strong>
+                <?php _e('Some required pages are missing:', 'hubspot-ecommerce'); ?>
+                <strong><?php echo esc_html(implode(', ', $missing_pages)); ?></strong>
+            </p>
+            <p>
+                <button type="button" class="button button-primary" id="hubspot-create-pages">
+                    <?php _e('Create Missing Pages Automatically', 'hubspot-ecommerce'); ?>
+                </button>
+                <button type="button" class="button" id="hubspot-dismiss-notice">
+                    <?php _e('Dismiss', 'hubspot-ecommerce'); ?>
+                </button>
+            </p>
+        </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            $('#hubspot-create-pages').on('click', function() {
+                var $button = $(this);
+                $button.prop('disabled', true).text('<?php esc_js(_e('Creating pages...', 'hubspot-ecommerce')); ?>');
+
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'hubspot_create_missing_pages',
+                        nonce: '<?php echo wp_create_nonce('hubspot_create_pages'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#hubspot-missing-pages-notice')
+                                .removeClass('notice-warning')
+                                .addClass('notice-success')
+                                .find('p').first().html('<strong><?php esc_js(_e('Success!', 'hubspot-ecommerce')); ?></strong> ' + response.data.message);
+                            $('#hubspot-missing-pages-notice p').last().remove();
+                            setTimeout(function() {
+                                $('#hubspot-missing-pages-notice').fadeOut();
+                            }, 3000);
+                        } else {
+                            alert(response.data.message);
+                            $button.prop('disabled', false).text('<?php esc_js(_e('Create Missing Pages Automatically', 'hubspot-ecommerce')); ?>');
+                        }
+                    },
+                    error: function() {
+                        alert('<?php esc_js(_e('An error occurred. Please try again.', 'hubspot-ecommerce')); ?>');
+                        $button.prop('disabled', false).text('<?php esc_js(_e('Create Missing Pages Automatically', 'hubspot-ecommerce')); ?>');
+                    }
+                });
+            });
+
+            $('#hubspot-dismiss-notice').on('click', function() {
+                $.post(ajaxurl, {
+                    action: 'hubspot_dismiss_pages_notice',
+                    nonce: '<?php echo wp_create_nonce('hubspot_dismiss_notice'); ?>'
+                });
+                $('#hubspot-missing-pages-notice').fadeOut();
+            });
+        });
+        </script>
+        <?php
     }
 
     /**
@@ -39,7 +146,7 @@ class HubSpot_Ecommerce_Admin {
             'manage_options',
             'hubspot-ecommerce',
             [$this, 'render_dashboard_page'],
-            'dashicons-hubspot',
+            'dashicons-cart',
             30
         );
 
@@ -68,6 +175,15 @@ class HubSpot_Ecommerce_Admin {
             'manage_options',
             'hubspot-ecommerce-sync',
             [$this, 'render_sync_page']
+        );
+
+        add_submenu_page(
+            'hubspot-ecommerce',
+            __('License', 'hubspot-ecommerce'),
+            __('License', 'hubspot-ecommerce'),
+            'manage_options',
+            'hubspot-ecommerce-license',
+            [$this, 'render_license_page']
         );
     }
 
@@ -108,9 +224,37 @@ class HubSpot_Ecommerce_Admin {
         $product_count = wp_count_posts('hs_product')->publish;
         $order_count = wp_count_posts('hs_order')->publish;
 
+        // Get API authentication status
+        $api = HubSpot_Ecommerce_API::instance();
+        $auth_status = $api->get_auth_status();
+
         ?>
         <div class="wrap">
             <h1><?php _e('HubSpot Ecommerce Dashboard', 'hubspot-ecommerce'); ?></h1>
+
+            <?php
+            // Show authentication status
+            if ($auth_status['mode'] === null): ?>
+                <div class="notice notice-error">
+                    <p>
+                        <strong><?php _e('Authentication Required:', 'hubspot-ecommerce'); ?></strong>
+                        <?php _e('Please install and configure the HubSpot plugin or add a Private App token in Settings.', 'hubspot-ecommerce'); ?>
+                    </p>
+                </div>
+            <?php elseif ($auth_status['mode'] === 'leadin'): ?>
+                <div class="notice notice-success">
+                    <p>
+                        <strong><?php _e('Authenticated via HubSpot Plugin', 'hubspot-ecommerce'); ?></strong>
+                        <?php printf(__('Portal ID: %s', 'hubspot-ecommerce'), esc_html($auth_status['portal_id'])); ?>
+                    </p>
+                </div>
+            <?php elseif ($auth_status['mode'] === 'private_app'): ?>
+                <div class="notice notice-success">
+                    <p>
+                        <strong><?php _e('Authenticated via Private App Token', 'hubspot-ecommerce'); ?></strong>
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <div class="hubspot-dashboard-cards">
                 <div class="hubspot-card">
@@ -288,6 +432,140 @@ class HubSpot_Ecommerce_Admin {
         wp_redirect(admin_url('edit.php?post_type=hs_product&synced=1'));
         exit;
     }
+
+    /**
+     * Render license page
+     */
+    public function render_license_page() {
+        $license = HubSpot_Ecommerce_License_Manager::instance();
+        $tier = $license->get_tier();
+        $status = $license->get_status();
+
+        // Show any admin notices from license actions
+        settings_errors('hubspot_ecommerce_license');
+
+        ?>
+        <div class="wrap">
+            <h1><?php _e('License Management', 'hubspot-ecommerce'); ?></h1>
+
+            <!-- Current Status -->
+            <div class="card" style="max-width: 600px;">
+                <h2><?php _e('Current Plan', 'hubspot-ecommerce'); ?></h2>
+                <table class="form-table">
+                    <tr>
+                        <th><?php _e('Tier:', 'hubspot-ecommerce'); ?></th>
+                        <td>
+                            <strong style="font-size: 18px; text-transform: capitalize;">
+                                <?php echo esc_html($tier); ?>
+                            </strong>
+                            <?php if ($tier === 'free'): ?>
+                                <a href="<?php echo esc_url($license->get_upgrade_url()); ?>"
+                                   class="button button-primary"
+                                   target="_blank"
+                                   style="margin-left: 10px;">
+                                    <?php _e('Upgrade to Pro', 'hubspot-ecommerce'); ?>
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php if ($tier !== 'free'): ?>
+                    <tr>
+                        <th><?php _e('Status:', 'hubspot-ecommerce'); ?></th>
+                        <td>
+                            <?php if ($status === 'active'): ?>
+                                <span style="color: green; font-size: 16px;">● <?php _e('Active', 'hubspot-ecommerce'); ?></span>
+                            <?php else: ?>
+                                <span style="color: red; font-size: 16px;">● <?php echo esc_html(ucfirst($status)); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                </table>
+            </div>
+
+            <!-- Activate/Deactivate License -->
+            <?php if ($tier === 'free'): ?>
+            <div class="card" style="max-width: 600px; margin-top: 20px;">
+                <h2><?php _e('Activate License', 'hubspot-ecommerce'); ?></h2>
+                <p><?php _e('Enter your license key to unlock Pro features.', 'hubspot-ecommerce'); ?></p>
+
+                <form method="post" action="">
+                    <?php wp_nonce_field('hubspot_activate_license', 'hubspot_license_nonce'); ?>
+                    <table class="form-table">
+                        <tr>
+                            <th><label for="license_key"><?php _e('License Key:', 'hubspot-ecommerce'); ?></label></th>
+                            <td>
+                                <input type="text"
+                                       id="license_key"
+                                       name="license_key"
+                                       class="regular-text code"
+                                       placeholder="XXXX-XXXX-XXXX-XXXX"
+                                       style="font-family: monospace; font-size: 14px;">
+                                <p class="description">
+                                    <?php _e('Enter the license key you received via email after purchase.', 'hubspot-ecommerce'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <p class="submit">
+                        <button type="submit" name="activate_license" class="button button-primary">
+                            <?php _e('Activate License', 'hubspot-ecommerce'); ?>
+                        </button>
+                    </p>
+                </form>
+
+                <p>
+                    <?php _e("Don't have a license?", 'hubspot-ecommerce'); ?>
+                    <a href="<?php echo esc_url($license->get_upgrade_url()); ?>" target="_blank">
+                        <?php _e('Purchase one now →', 'hubspot-ecommerce'); ?>
+                    </a>
+                </p>
+            </div>
+            <?php else: ?>
+            <div class="card" style="max-width: 600px; margin-top: 20px;">
+                <h2><?php _e('Manage License', 'hubspot-ecommerce'); ?></h2>
+                <p><?php _e('Deactivating your license will disable Pro features and revert to the Free tier.', 'hubspot-ecommerce'); ?></p>
+                <form method="post" action="">
+                    <?php wp_nonce_field('hubspot_deactivate_license', 'hubspot_license_nonce'); ?>
+                    <p>
+                        <button type="submit"
+                                name="deactivate_license"
+                                class="button button-secondary"
+                                onclick="return confirm('<?php esc_attr_e('Are you sure? Pro features will be locked.', 'hubspot-ecommerce'); ?>');">
+                            <?php _e('Deactivate License', 'hubspot-ecommerce'); ?>
+                        </button>
+                    </p>
+                </form>
+            </div>
+            <?php endif; ?>
+
+            <!-- Feature Comparison -->
+            <div class="card" style="max-width: 900px; margin-top: 20px;">
+                <h2><?php _e('Feature Comparison', 'hubspot-ecommerce'); ?></h2>
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;"><?php _e('Feature', 'hubspot-ecommerce'); ?></th>
+                            <th><?php _e('Free', 'hubspot-ecommerce'); ?></th>
+                            <th><?php _e('Pro', 'hubspot-ecommerce'); ?></th>
+                            <th><?php _e('Enterprise', 'hubspot-ecommerce'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($license->get_feature_comparison() as $row): ?>
+                        <tr>
+                            <td><strong><?php echo esc_html($row['feature']); ?></strong></td>
+                            <td><?php echo esc_html($row['free']); ?></td>
+                            <td><?php echo esc_html($row['pro']); ?></td>
+                            <td><?php echo esc_html($row['enterprise']); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php
+    }
 }
 
 // AJAX handler for product sync
@@ -298,17 +576,44 @@ add_action('wp_ajax_hubspot_sync_products', function() {
         wp_send_json_error(['message' => __('Insufficient permissions', 'hubspot-ecommerce')]);
     }
 
+    // Check authentication first
+    $api = HubSpot_Ecommerce_API::instance();
+    $auth_status = $api->get_auth_status();
+
+    if ($auth_status['mode'] === null) {
+        wp_send_json_error([
+            'message' => __('HubSpot authentication not configured. Please install the HubSpot plugin or add a Private App token in Settings.', 'hubspot-ecommerce'),
+        ]);
+    }
+
     $product_manager = HubSpot_Ecommerce_Product_Manager::instance();
     $result = $product_manager->sync_products();
 
     if (!empty($result['errors'])) {
+        // Show detailed error information
+        $error_message = sprintf(
+            __('Synced %d products with %d errors', 'hubspot-ecommerce'),
+            $result['synced'],
+            count($result['errors'])
+        );
+
+        // Add first error for quick diagnosis
+        if (isset($result['errors'][0])) {
+            $error_message .= ': ' . $result['errors'][0];
+        }
+
         wp_send_json_error([
-            'message' => sprintf(
-                __('Synced %d products with %d errors', 'hubspot-ecommerce'),
-                $result['synced'],
-                count($result['errors'])
-            ),
+            'message' => $error_message,
             'errors' => $result['errors'],
+            'synced' => $result['synced'],
+        ]);
+    }
+
+    // Success - but check if any products were actually synced
+    if ($result['synced'] === 0) {
+        wp_send_json_success([
+            'synced' => 0,
+            'message' => __('Sync completed, but no products were found in HubSpot. Make sure you have products in your HubSpot account.', 'hubspot-ecommerce'),
         ]);
     }
 
@@ -316,4 +621,79 @@ add_action('wp_ajax_hubspot_sync_products', function() {
         'synced' => $result['synced'],
         'message' => sprintf(__('Successfully synced %d products', 'hubspot-ecommerce'), $result['synced']),
     ]);
+});
+
+// AJAX handler for creating missing pages
+add_action('wp_ajax_hubspot_create_missing_pages', function() {
+    check_ajax_referer('hubspot_create_pages', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => __('Insufficient permissions', 'hubspot-ecommerce')]);
+    }
+
+    $pages_to_create = [
+        'hubspot_ecommerce_shop_page' => [
+            'title' => __('Shop', 'hubspot-ecommerce'),
+            'content' => '[hubspot_products]',
+        ],
+        'hubspot_ecommerce_cart_page' => [
+            'title' => __('Cart', 'hubspot-ecommerce'),
+            'content' => '[hubspot_cart]',
+        ],
+        'hubspot_ecommerce_checkout_page' => [
+            'title' => __('Checkout', 'hubspot-ecommerce'),
+            'content' => '[hubspot_checkout]',
+        ],
+        'hubspot_ecommerce_account_page' => [
+            'title' => __('My Account', 'hubspot-ecommerce'),
+            'content' => '[hubspot_account]',
+        ],
+    ];
+
+    $created_pages = [];
+    foreach ($pages_to_create as $option_name => $page_data) {
+        // Check if page already exists
+        $existing_page_id = get_option($option_name);
+        if ($existing_page_id && get_post_status($existing_page_id) === 'publish') {
+            continue;
+        }
+
+        // Create the page
+        $page_id = wp_insert_post([
+            'post_title' => $page_data['title'],
+            'post_content' => $page_data['content'],
+            'post_status' => 'publish',
+            'post_type' => 'page',
+            'post_author' => get_current_user_id(),
+        ]);
+
+        if (!is_wp_error($page_id)) {
+            update_option($option_name, $page_id);
+            $created_pages[] = $page_data['title'];
+        }
+    }
+
+    if (empty($created_pages)) {
+        wp_send_json_error(['message' => __('No pages needed to be created.', 'hubspot-ecommerce')]);
+    }
+
+    wp_send_json_success([
+        'message' => sprintf(
+            __('Successfully created %d page(s): %s', 'hubspot-ecommerce'),
+            count($created_pages),
+            implode(', ', $created_pages)
+        ),
+    ]);
+});
+
+// AJAX handler for dismissing the notice
+add_action('wp_ajax_hubspot_dismiss_pages_notice', function() {
+    check_ajax_referer('hubspot_dismiss_notice', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => __('Insufficient permissions', 'hubspot-ecommerce')]);
+    }
+
+    update_option('hubspot_ecommerce_pages_notice_dismissed', true);
+    wp_send_json_success();
 });

@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: HubSpot Ecommerce
- * Plugin URI: https://github.com/yourusername/hubspot-ecommerce
+ * Plugin URI: https://github.com/baursoftware/hubspot-ecommerce
  * Description: A full-featured ecommerce solution using HubSpot as the backend for products, orders, and customer management.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://yourwebsite.com
+ * Author: Todd Baur
+ * Author URI: https://baursoftware.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: hubspot-ecommerce
@@ -77,6 +77,12 @@ final class HubSpot_Ecommerce {
         // Mock API for demo mode
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-mock-hubspot-api.php';
 
+        // License Manager (loads FIRST - needed for feature gating)
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-license-manager.php';
+
+        // OAuth client (loads second - needed for API authentication)
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-oauth-client.php';
+
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-hubspot-api.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-product-manager.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-cart.php';
@@ -91,6 +97,9 @@ final class HubSpot_Ecommerce {
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-admin.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-settings.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-setup-wizard.php';
+
+            // Initialize OAuth client
+            HubSpot_Ecommerce_OAuth_Client::instance();
         }
 
         // Frontend classes
@@ -100,7 +109,8 @@ final class HubSpot_Ecommerce {
         }
 
         // Initialize components
-        HubSpot_Ecommerce_Mock_API::instance(); // Initialize mock API first (checks for demo mode)
+        HubSpot_Ecommerce_License_Manager::instance(); // Initialize license manager FIRST (feature gating)
+        HubSpot_Ecommerce_Mock_API::instance(); // Initialize mock API second (checks for demo mode)
         HubSpot_Ecommerce_API::instance();
         HubSpot_Ecommerce_Product_Manager::instance();
         HubSpot_Ecommerce_Cart::instance();

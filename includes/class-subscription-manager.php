@@ -24,7 +24,16 @@ class HubSpot_Ecommerce_Subscription_Manager {
     private function __construct() {
         $this->api = HubSpot_Ecommerce_API::instance();
 
-        // Admin hooks
+        // Check if Pro tier before adding hooks
+        $license = HubSpot_Ecommerce_License_Manager::instance();
+
+        if (!$license->can_use_subscriptions()) {
+            // Show locked menu item for Free tier
+            add_action('admin_menu', [$this, 'add_locked_submenu'], 20);
+            return; // Don't add any other hooks
+        }
+
+        // Admin hooks (only if Pro tier)
         add_action('admin_menu', [$this, 'add_admin_submenu'], 20);
         add_action('admin_init', [$this, 'sync_subscription_types']);
 
@@ -46,6 +55,56 @@ class HubSpot_Ecommerce_Subscription_Manager {
             'hubspot-ecommerce-subscriptions',
             [$this, 'render_subscriptions_page']
         );
+    }
+
+    /**
+     * Add locked submenu (Free tier)
+     */
+    public function add_locked_submenu() {
+        add_submenu_page(
+            'hubspot-ecommerce',
+            __('Subscriptions 🔒', 'hubspot-ecommerce'),
+            __('Subscriptions 🔒', 'hubspot-ecommerce'),
+            'manage_options',
+            'hubspot-ecommerce-subscriptions-locked',
+            [$this, 'render_locked_page']
+        );
+    }
+
+    /**
+     * Render locked page (Free tier)
+     */
+    public function render_locked_page() {
+        $license = HubSpot_Ecommerce_License_Manager::instance();
+        ?>
+        <div class="wrap">
+            <h1><?php _e('Subscription Management', 'hubspot-ecommerce'); ?> 🔒</h1>
+
+            <?php $license->render_upgrade_notice(__('Subscription Management', 'hubspot-ecommerce')); ?>
+
+            <div class="card" style="max-width: 800px; margin: 20px 0;">
+                <h2><?php _e('What You Can Do with Subscriptions', 'hubspot-ecommerce'); ?></h2>
+                <ul style="font-size: 15px; line-height: 2;">
+                    <li>✅ <strong>Recurring subscriptions</strong> - Sell monthly/yearly products</li>
+                    <li>✅ <strong>Email subscription preferences</strong> - Sync marketing opt-ins with HubSpot</li>
+                    <li>✅ <strong>Automated billing</strong> - HubSpot handles recurring charges automatically</li>
+                    <li>✅ <strong>Subscription analytics</strong> - Track MRR, churn, and customer lifetime value</li>
+                    <li>✅ <strong>Customer portal</strong> - Let customers manage their own subscriptions</li>
+                </ul>
+            </div>
+
+            <div class="card" style="max-width: 800px; margin: 20px 0;">
+                <h2><?php _e('How to Upgrade', 'hubspot-ecommerce'); ?></h2>
+                <ol style="font-size: 15px; line-height: 1.8;">
+                    <li>Purchase a Pro license at <a href="<?php echo esc_url($license->get_upgrade_url()); ?>" target="_blank">baursoftware.com</a></li>
+                    <li>Receive your license key via email</li>
+                    <li>Go to <strong>HubSpot Shop → License</strong> and enter your key</li>
+                    <li>Follow the guided wizard to set up Private App in HubSpot</li>
+                    <li>All Pro features automatically unlock!</li>
+                </ol>
+            </div>
+        </div>
+        <?php
     }
 
     /**

@@ -45,7 +45,7 @@ class HubSpot_Ecommerce_Cart {
      */
     private function init_session() {
         if (!isset($_COOKIE['hubspot_ecommerce_session'])) {
-            $this->session_id = wp_generate_password(32, false);
+            $this->session_id = $this->generate_session_id();
 
             // Set secure cookie with proper flags
             $secure = is_ssl();
@@ -83,9 +83,20 @@ class HubSpot_Ecommerce_Cart {
             $this->session_id = preg_replace('/[^a-zA-Z0-9]/', '', $_COOKIE['hubspot_ecommerce_session']);
             if (strlen($this->session_id) !== 32) {
                 // Invalid session ID, generate new one
-                $this->session_id = wp_generate_password(32, false);
+                $this->session_id = $this->generate_session_id();
             }
         }
+    }
+
+    /**
+     * Generate a cryptographically secure random session ID
+     *
+     * @return string 32-character hexadecimal session ID
+     */
+    private function generate_session_id() {
+        // Use random_bytes for cryptographically secure random data
+        // 16 bytes = 32 hex characters
+        return bin2hex(random_bytes(16));
     }
 
     /**

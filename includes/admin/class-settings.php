@@ -28,10 +28,15 @@ class HubSpot_Ecommerce_Settings {
      * Register settings
      */
     public function register_settings() {
-        // API Settings
-        register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_api_key');
+        // Settings
         register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_sync_interval');
         register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_currency');
+
+        // Pro feature: Private App Access Token
+        $license_manager = HubSpot_Ecommerce_License_Manager::instance();
+        if ($license_manager->can_use_private_app()) {
+            register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_api_key');
+        }
 
         // Page Settings
         register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_shop_page');
@@ -48,9 +53,7 @@ class HubSpot_Ecommerce_Settings {
             $this->save_settings();
         }
 
-        $api = HubSpot_Ecommerce_API::instance();
-        $auth_status = $api->get_auth_status();
-
+        $license_manager = HubSpot_Ecommerce_License_Manager::instance();
         $api_key = get_option('hubspot_ecommerce_api_key', '');
         $sync_interval = get_option('hubspot_ecommerce_sync_interval', 'hourly');
         $currency = get_option('hubspot_ecommerce_currency', 'USD');
@@ -59,127 +62,10 @@ class HubSpot_Ecommerce_Settings {
         <div class="wrap">
             <h1><?php _e('HubSpot Ecommerce Settings', 'hubspot-ecommerce'); ?></h1>
 
-            <!-- Authentication Status Card -->
-            <div class="card" style="max-width: 800px; margin: 20px 0;">
-                <h2><?php _e('Authentication Status', 'hubspot-ecommerce'); ?></h2>
-
-                <?php if ($auth_status['mode'] === 'leadin') : ?>
-                    <!-- Leadin OAuth Mode -->
-                    <div class="notice notice-success inline" style="margin: 0;">
-                        <p>
-                            <span class="dashicons dashicons-yes-alt" style="color: green;"></span>
-                            <strong><?php _e('Connected via HubSpot Plugin (OAuth 2.0)', 'hubspot-ecommerce'); ?></strong>
-                        </p>
-                    </div>
-                    <table class="form-table">
-                        <tr>
-                            <th><?php _e('Authentication Mode', 'hubspot-ecommerce'); ?></th>
-                            <td>
-                                <strong><?php _e('OAuth 2.0', 'hubspot-ecommerce'); ?></strong>
-                                <span class="description" style="display: block;">
-                                    <?php _e('Secure OAuth authentication managed by the official HubSpot plugin', 'hubspot-ecommerce'); ?>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><?php _e('Portal ID', 'hubspot-ecommerce'); ?></th>
-                            <td><code><?php echo esc_html($auth_status['portal_id']); ?></code></td>
-                        </tr>
-                        <tr>
-                            <th><?php _e('Token Management', 'hubspot-ecommerce'); ?></th>
-                            <td>
-                                <span style="color: green;">✓</span> <?php _e('Automatic token refresh enabled', 'hubspot-ecommerce'); ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><?php _e('Security', 'hubspot-ecommerce'); ?></th>
-                            <td>
-                                <span style="color: green;">✓</span> <?php _e('OAuth 2.0 (Most Secure)', 'hubspot-ecommerce'); ?>
-                            </td>
-                        </tr>
-                    </table>
-                    <p style="margin-top: 15px;">
-                        <a href="<?php echo admin_url('admin.php?page=leadin'); ?>" class="button">
-                            <?php _e('Manage HubSpot Connection', 'hubspot-ecommerce'); ?>
-                        </a>
-                    </p>
-
-                <?php elseif ($auth_status['mode'] === 'private_app') : ?>
-                    <!-- Private App Token Mode -->
-                    <div class="notice notice-info inline" style="margin: 0;">
-                        <p>
-                            <span class="dashicons dashicons-admin-network" style="color: #0073aa;"></span>
-                            <strong><?php _e('Connected via Private App Token', 'hubspot-ecommerce'); ?></strong>
-                        </p>
-                    </div>
-                    <table class="form-table">
-                        <tr>
-                            <th><?php _e('Authentication Mode', 'hubspot-ecommerce'); ?></th>
-                            <td>
-                                <strong><?php _e('Private App Token', 'hubspot-ecommerce'); ?></strong>
-                                <span class="description" style="display: block;">
-                                    <?php _e('Using bearer token authentication', 'hubspot-ecommerce'); ?>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><?php _e('Token Status', 'hubspot-ecommerce'); ?></th>
-                            <td>
-                                <button type="button" id="test-connection" class="button">
-                                    <?php _e('Test Connection', 'hubspot-ecommerce'); ?>
-                                </button>
-                                <span id="connection-status"></span>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <div class="notice notice-warning inline" style="margin: 15px 0 0;">
-                        <p>
-                            <strong><?php _e('Recommended: Upgrade to OAuth', 'hubspot-ecommerce'); ?></strong><br>
-                            <?php _e('Install the official HubSpot plugin for easier setup and automatic token management.', 'hubspot-ecommerce'); ?>
-                            <a href="<?php echo admin_url('plugin-install.php?s=hubspot&tab=search&type=term'); ?>" class="button button-small">
-                                <?php _e('Install HubSpot Plugin', 'hubspot-ecommerce'); ?>
-                            </a>
-                        </p>
-                    </div>
-
-                <?php else : ?>
-                    <!-- No Authentication -->
-                    <div class="notice notice-error inline" style="margin: 0;">
-                        <p>
-                            <span class="dashicons dashicons-warning" style="color: #dc3232;"></span>
-                            <strong><?php _e('No Authentication Configured', 'hubspot-ecommerce'); ?></strong>
-                        </p>
-                    </div>
-                    <p style="margin: 15px 0;">
-                        <?php _e('Choose one of the following authentication methods:', 'hubspot-ecommerce'); ?>
-                    </p>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
-                        <div class="notice notice-info inline" style="margin: 0; padding: 15px;">
-                            <h3 style="margin: 0 0 10px;"><?php _e('Option 1: OAuth (Recommended)', 'hubspot-ecommerce'); ?></h3>
-                            <p><?php _e('Easy one-click setup with automatic token management.', 'hubspot-ecommerce'); ?></p>
-                            <a href="<?php echo admin_url('plugin-install.php?s=hubspot&tab=search&type=term'); ?>" class="button button-primary">
-                                <?php _e('Install HubSpot Plugin', 'hubspot-ecommerce'); ?>
-                            </a>
-                        </div>
-
-                        <div class="notice notice-info inline" style="margin: 0; padding: 15px;">
-                            <h3 style="margin: 0 0 10px;"><?php _e('Option 2: Private App Token', 'hubspot-ecommerce'); ?></h3>
-                            <p><?php _e('Manual setup using a Private App access token.', 'hubspot-ecommerce'); ?></p>
-                            <a href="#manual-config" class="button" onclick="document.getElementById('manual-api-config').style.display='block'; return false;">
-                                <?php _e('Configure Manually', 'hubspot-ecommerce'); ?>
-                            </a>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-
             <form method="post" action="">
                 <?php wp_nonce_field('hubspot_ecommerce_settings', 'hubspot_ecommerce_settings_nonce'); ?>
 
-                <!-- Manual API Configuration (collapsible if not needed) -->
-                <div id="manual-api-config" style="<?php echo ($auth_status['mode'] === 'leadin') ? 'display:none;' : ''; ?>">
+                <?php if ($license_manager->can_use_private_app()) : ?>
                     <h2><?php _e('API Configuration', 'hubspot-ecommerce'); ?></h2>
                     <table class="form-table">
                         <tr>
@@ -195,11 +81,17 @@ class HubSpot_Ecommerce_Settings {
                                         'https://knowledge.hubspot.com/integrations/how-do-i-get-my-hubspot-api-key'
                                     ); ?>
                                 </p>
+                                <button type="button" id="test-connection" class="button">
+                                    <?php _e('Test Connection', 'hubspot-ecommerce'); ?>
+                                </button>
+                                <span id="connection-status"></span>
                             </td>
                         </tr>
                     </table>
-                </div>
+                <?php endif; ?>
 
+                <h2><?php _e('General Settings', 'hubspot-ecommerce'); ?></h2>
+                <table class="form-table">
                     <tr>
                         <th scope="row">
                             <label for="sync_interval"><?php _e('Product Sync Interval', 'hubspot-ecommerce'); ?></label>
@@ -324,8 +216,9 @@ class HubSpot_Ecommerce_Settings {
             return;
         }
 
+        $license_manager = HubSpot_Ecommerce_License_Manager::instance();
+
         $settings = [
-            'hubspot_ecommerce_api_key',
             'hubspot_ecommerce_sync_interval',
             'hubspot_ecommerce_currency',
             'hubspot_ecommerce_shop_page',
@@ -333,6 +226,11 @@ class HubSpot_Ecommerce_Settings {
             'hubspot_ecommerce_checkout_page',
             'hubspot_ecommerce_account_page',
         ];
+
+        // Add API key to settings if pro feature is enabled
+        if ($license_manager->can_use_private_app()) {
+            $settings[] = 'hubspot_ecommerce_api_key';
+        }
 
         foreach ($settings as $setting) {
             if (isset($_POST[$setting])) {

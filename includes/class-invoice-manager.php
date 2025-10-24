@@ -38,6 +38,24 @@ class HubSpot_Ecommerce_Invoice_Manager {
      */
     private function __construct() {
         $this->api = HubSpot_Ecommerce_API::instance();
+
+        // Only enable invoice features if Pro tier
+        // Invoice API is not available with OAuth (Free tier)
+        $license = HubSpot_Ecommerce_License_Manager::instance();
+        if (!$license->can_use_invoices()) {
+            // Don't register any hooks - feature disabled
+            return;
+        }
+
+        // Future: Add any invoice-related hooks here
+    }
+
+    /**
+     * Check if invoice features are available
+     */
+    public static function is_available() {
+        $license = HubSpot_Ecommerce_License_Manager::instance();
+        return $license->can_use_invoices();
     }
 
     /**

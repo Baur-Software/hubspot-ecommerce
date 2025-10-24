@@ -16,7 +16,9 @@ class HubSpot_Ecommerce_API {
     private $api_base = 'https://api.hubapi.com';
     private $use_leadin = false;
     private $portal_id = null;
-    private $auth_mode = null; // 'leadin', 'private_app', or null
+    private $auth_mode = null; // 'oauth', 'private_app', or null
+    private $access_token_cache = null;
+    private $access_token_expires = null;
 
     public static function instance() {
         if (is_null(self::$instance)) {
@@ -33,15 +35,25 @@ class HubSpot_Ecommerce_API {
      * Detect which authentication mode to use
      */
     private function detect_authentication_mode() {
-        // First, check if HubSpot leadin plugin is active and connected
-        if ($this->is_leadin_active() && $this->get_leadin_portal_id()) {
+        // First priority: Check if our OAuth client is connected
+        if (class_exists('HubSpot_Ecommerce_OAuth_Client')) {
+            $oauth_client = HubSpot_Ecommerce_OAuth_Client::instance();
+            if ($oauth_client->is_connected()) {
+                $this->auth_mode = 'oauth';
+                $this->portal_id = $oauth_client->get_portal_id();
+                return;
+            }
+        }
+
+        // Second priority: Check if HubSpot leadin plugin is active and connected
+        if ($this->is_leadin_active() && $this->get_leadin_portal_id() && $this->get_leadin_refresh_token()) {
             $this->use_leadin = true;
-            $this->auth_mode = 'leadin';
+            $this->auth_mode = 'oauth_leadin';
             $this->portal_id = $this->get_leadin_portal_id();
             return;
         }
 
-        // Fallback to Private App token
+        // Third priority: Fallback to Private App token
         $this->api_key = get_option('hubspot_ecommerce_api_key');
         if (!empty($this->api_key)) {
             $this->use_leadin = false;
@@ -71,37 +83,121 @@ class HubSpot_Ecommerce_API {
     }
 
     /**
-     * Get access token from leadin plugin
+     * Get refresh token from leadin plugin
      */
-    private function get_leadin_access_token() {
-        // Try to access leadin's OAuth class
-        if (!class_exists('Leadin\\admin\\LeadinAdmin')) {
+    private function get_leadin_refresh_token() {
+        // Leadin stores encrypted refresh token
+        $encrypted_token = get_option('leadin_refresh_token');
+
+        if (empty($encrypted_token)) {
             return null;
         }
 
-        // Leadin stores tokens internally, we need to hook into their API
-        // Check if we can access the token through filters or global state
-        $token = apply_filters('leadin_access_token', null);
-
-        if ($token) {
-            return $token;
+        // Try to use leadin's OAuth class to decrypt if available
+        if (class_exists('Leadin\\auth\\OAuth')) {
+            try {
+                return \Leadin\auth\OAuth::get_refresh_token();
+            } catch (Exception $e) {
+                error_log('HubSpot Ecommerce: Failed to get refresh token from leadin: ' . $e->getMessage());
+                return null;
+            }
         }
 
-        // Alternative: Try to get from leadin's internal storage
-        // Note: This might need adjustment based on leadin's actual implementation
-        $leadin_options = get_option('leadin_options', []);
-        if (isset($leadin_options['access_token'])) {
-            return $leadin_options['access_token'];
+        // Fallback: token might be stored in plaintext on sites without proper keys/salts
+        return $encrypted_token;
+    }
+
+    /**
+     * Get fresh access token using refresh token
+     */
+    private function get_leadin_access_token() {
+        // Check if we have a cached access token that's still valid
+        $cached_token = get_transient('hubspot_ecommerce_access_token');
+        if ($cached_token) {
+            return $cached_token;
         }
 
+        // Need to refresh the access token
+        $refresh_token = $this->get_leadin_refresh_token();
+        if (!$refresh_token) {
+            return null;
+        }
+
+        // Make request to refresh token
+        // Note: This requires HubSpot app credentials which are embedded in leadin plugin
+        // We'll use a WordPress proxy endpoint that leadin might expose, or make direct call
+
+        // Try to use leadin's token refresh mechanism if available
+        if (function_exists('leadin_get_access_token')) {
+            return leadin_get_access_token();
+        }
+
+        // Otherwise, we need to refresh manually
+        // This requires client_id and client_secret which are in the leadin plugin
+        // For now, return null and log error
+        error_log('HubSpot Ecommerce: Unable to refresh OAuth access token. Leadin plugin may need update.');
         return null;
+    }
+
+    /**
+     * Refresh OAuth access token using refresh token
+     */
+    private function refresh_access_token() {
+        $refresh_token = $this->get_leadin_refresh_token();
+
+        if (!$refresh_token) {
+            return new WP_Error('no_refresh_token', 'No refresh token available');
+        }
+
+        // Make request to HubSpot OAuth endpoint
+        // Note: This requires knowing the client_id and client_secret
+        // These are embedded in the leadin plugin and not easily accessible
+        // Best approach: Use leadin's own token refresh if possible
+
+        $response = wp_remote_post('https://api.hubapi.com/oauth/v1/token', [
+            'body' => [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refresh_token,
+                // client_id and client_secret would be needed here
+                // But they're internal to leadin plugin
+            ],
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (isset($body['access_token'])) {
+            // Cache the access token (expires in 30 minutes)
+            $expires_in = isset($body['expires_in']) ? (int) $body['expires_in'] : 1800;
+            set_transient('hubspot_ecommerce_access_token', $body['access_token'], $expires_in - 60); // Refresh 1 min early
+
+            return $body['access_token'];
+        }
+
+        return new WP_Error('token_refresh_failed', 'Failed to refresh access token');
     }
 
     /**
      * Get authorization header for API requests
      */
     private function get_authorization_header() {
-        if ($this->use_leadin) {
+        // First: Try our OAuth client
+        if ($this->auth_mode === 'oauth' && class_exists('HubSpot_Ecommerce_OAuth_Client')) {
+            $oauth_client = HubSpot_Ecommerce_OAuth_Client::instance();
+            $token = $oauth_client->get_access_token();
+            if ($token && !is_wp_error($token)) {
+                return 'Bearer ' . $token;
+            }
+        }
+
+        // Second: Try leadin plugin OAuth
+        if ($this->auth_mode === 'oauth_leadin' && $this->use_leadin) {
             $token = $this->get_leadin_access_token();
             if ($token) {
                 return 'Bearer ' . $token;
@@ -111,6 +207,7 @@ class HubSpot_Ecommerce_API {
             $this->api_key = get_option('hubspot_ecommerce_api_key');
         }
 
+        // Third: Try Private App token
         if (!empty($this->api_key)) {
             return 'Bearer ' . $this->api_key;
         }
@@ -122,12 +219,24 @@ class HubSpot_Ecommerce_API {
      * Get authentication status
      */
     public function get_auth_status() {
-        return [
+        $status = [
             'mode' => $this->auth_mode,
             'leadin_active' => $this->is_leadin_active(),
             'portal_id' => $this->portal_id,
             'has_private_key' => !empty($this->api_key),
+            'oauth_connected' => false,
         ];
+
+        // Add OAuth client status if available
+        if (class_exists('HubSpot_Ecommerce_OAuth_Client')) {
+            $oauth_client = HubSpot_Ecommerce_OAuth_Client::instance();
+            $status['oauth_connected'] = $oauth_client->is_connected();
+            if ($status['oauth_connected']) {
+                $status['portal_id'] = $oauth_client->get_portal_id();
+            }
+        }
+
+        return $status;
     }
 
     /**
@@ -196,6 +305,11 @@ class HubSpot_Ecommerce_API {
                 'hs_url',
                 'createdate',
                 'hs_product_type',
+                // Subscription/recurring billing properties
+                'hs_recurring_billing_period',
+                'recurringbillingfrequency',
+                'hs_billing_period_units',
+                'hs_recurring_billing_start_date',
             ]),
         ];
 

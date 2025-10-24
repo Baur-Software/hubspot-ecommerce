@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Read(//c/Users/Todd/Projects/wp-plugins/**)"
+      "Read(//c/Users/Todd/Projects/wp-plugins/**)",
+      "Read(//c/Users/Todd/Local Sites/baur-software/app/**)",
+      "Bash(wp plugin:*)",
+      "Read(//c/Users/Todd/Local Sites/baur-software/conf/nginx/**)"
     ],
     "deny": [],
     "ask": []
