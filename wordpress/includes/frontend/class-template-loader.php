@@ -45,7 +45,30 @@ class HubSpot_Ecommerce_Template_Loader {
      */
     public function single_product_template($template) {
         if (is_singular('hs_product')) {
-            $new_template = $this->locate_template('single-product.php');
+            global $post;
+
+            // Get selected template from meta
+            $template_choice = get_post_meta($post->ID, '_product_template', true);
+
+            // Map template choices to file names
+            $template_files = [
+                'minimal' => 'single-product-minimal.php',
+                'detailed' => 'single-product-detailed.php',
+                'landing' => 'single-product-landing.php',
+                'default' => 'single-product.php'
+            ];
+
+            // Get template file name (default if not set or invalid)
+            $template_file = isset($template_files[$template_choice]) ? $template_files[$template_choice] : $template_files['default'];
+
+            // Try to locate the selected template
+            $new_template = $this->locate_template($template_file);
+
+            // Fallback to default if selected template doesn't exist
+            if (!$new_template && $template_file !== 'single-product.php') {
+                $new_template = $this->locate_template('single-product.php');
+            }
+
             if ($new_template) {
                 return $new_template;
             }

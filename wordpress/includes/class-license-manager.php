@@ -125,6 +125,16 @@ class HubSpot_Ecommerce_License_Manager {
     }
 
     /**
+     * Check if user can use automatic product sync (Pro feature)
+     *
+     * Free tier: Manual sync only (push/pull buttons)
+     * Pro tier: Automatic scheduled sync from HubSpot + auto-push on save
+     */
+    public function can_use_auto_sync() {
+        return $this->is_licensed();
+    }
+
+    /**
      * Check if user can use multi-store (Enterprise only)
      */
     public function can_use_multistore() {

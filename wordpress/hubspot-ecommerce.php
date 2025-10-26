@@ -97,6 +97,7 @@ final class HubSpot_Ecommerce {
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-admin.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-settings.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-setup-wizard.php';
+            require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-product-meta-boxes.php';
 
             // Initialize OAuth client
             HubSpot_Ecommerce_OAuth_Client::instance();
@@ -123,6 +124,7 @@ final class HubSpot_Ecommerce {
         if (is_admin()) {
             HubSpot_Ecommerce_Admin::instance();
             HubSpot_Ecommerce_Setup_Wizard::instance();
+            HubSpot_Ecommerce_Product_Meta_Boxes::instance();
         } else {
             HubSpot_Ecommerce_Frontend::instance();
         }

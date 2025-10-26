@@ -170,8 +170,8 @@ class HubSpot_Ecommerce_Admin {
 
         add_submenu_page(
             'hubspot-ecommerce',
-            __('Sync Products', 'hubspot-ecommerce'),
-            __('Sync Products', 'hubspot-ecommerce'),
+            __('Product Sync', 'hubspot-ecommerce'),
+            __('Product Sync', 'hubspot-ecommerce'),
             'manage_options',
             'hubspot-ecommerce-sync',
             [$this, 'render_sync_page']
@@ -315,15 +315,30 @@ class HubSpot_Ecommerce_Admin {
      * Render sync page
      */
     public function render_sync_page() {
+        $license_manager = HubSpot_Ecommerce_License_Manager::instance();
+        $is_pro = $license_manager->can_use_auto_sync();
         ?>
         <div class="wrap">
-            <h1><?php _e('Sync Products from HubSpot', 'hubspot-ecommerce'); ?></h1>
+            <h1><?php _e('Product Sync', 'hubspot-ecommerce'); ?></h1>
+
+            <?php if (!$is_pro) : ?>
+                <div class="notice notice-info">
+                    <p>
+                        <strong><?php _e('Manual Sync Available (Free)', 'hubspot-ecommerce'); ?></strong><br>
+                        <?php _e('Use the button below to manually sync products from HubSpot to WordPress.', 'hubspot-ecommerce'); ?><br>
+                        <?php _e('Want automatic scheduled syncing?', 'hubspot-ecommerce'); ?>
+                        <a href="https://baursoftware.com/products/hubspot-ecommerce" target="_blank">
+                            <?php _e('Upgrade to Pro', 'hubspot-ecommerce'); ?> &rarr;
+                        </a>
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <div class="hubspot-sync-container">
-                <p><?php _e('This will sync all products from your HubSpot account to WordPress.', 'hubspot-ecommerce'); ?></p>
+                <p><?php _e('This will pull all products from your HubSpot account and sync them to WordPress.', 'hubspot-ecommerce'); ?></p>
 
                 <button id="hubspot-sync-products" class="button button-primary button-hero">
-                    <?php _e('Sync Products Now', 'hubspot-ecommerce'); ?>
+                    <?php _e('Pull Products from HubSpot', 'hubspot-ecommerce'); ?>
                 </button>
 
                 <div id="hubspot-sync-progress" style="display:none; margin-top: 20px;">

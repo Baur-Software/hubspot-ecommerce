@@ -94,28 +94,6 @@ class HubSpot_Ecommerce_Settings {
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="sync_interval"><?php _e('Product Sync Interval', 'hubspot-ecommerce'); ?></label>
-                        </th>
-                        <td>
-                            <select id="sync_interval" name="hubspot_ecommerce_sync_interval">
-                                <option value="hourly" <?php selected($sync_interval, 'hourly'); ?>>
-                                    <?php _e('Hourly', 'hubspot-ecommerce'); ?>
-                                </option>
-                                <option value="twicedaily" <?php selected($sync_interval, 'twicedaily'); ?>>
-                                    <?php _e('Twice Daily', 'hubspot-ecommerce'); ?>
-                                </option>
-                                <option value="daily" <?php selected($sync_interval, 'daily'); ?>>
-                                    <?php _e('Daily', 'hubspot-ecommerce'); ?>
-                                </option>
-                            </select>
-                            <p class="description">
-                                <?php _e('How often to automatically sync products from HubSpot', 'hubspot-ecommerce'); ?>
-                            </p>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th scope="row">
                             <label for="currency"><?php _e('Currency', 'hubspot-ecommerce'); ?></label>
                         </th>
                         <td>
@@ -128,6 +106,115 @@ class HubSpot_Ecommerce_Settings {
                         </td>
                     </tr>
                 </table>
+
+                <!-- Pro Features Section -->
+                <?php
+                $license_manager = HubSpot_Ecommerce_License_Manager::instance();
+                $is_pro = $license_manager->can_use_auto_sync();
+                $auto_sync_from_hubspot = get_option('hubspot_ecommerce_auto_sync_from_hubspot', false);
+                $auto_push_to_hubspot = get_option('hubspot_ecommerce_auto_push_products', false);
+                ?>
+
+                <h2>
+                    <?php _e('Product Sync Settings', 'hubspot-ecommerce'); ?>
+                    <?php if (!$is_pro) : ?>
+                        <span class="pro-badge" style="background: #2271b1; color: white; padding: 4px 8px; border-radius: 3px; font-size: 12px; font-weight: normal; margin-left: 10px;">PRO</span>
+                    <?php endif; ?>
+                </h2>
+
+                <?php if (!$is_pro) : ?>
+                    <div class="notice notice-info inline" style="margin: 15px 0;">
+                        <p>
+                            <strong><?php _e('Automatic Product Sync is a Pro Feature', 'hubspot-ecommerce'); ?></strong><br>
+                            <?php _e('Free tier: Manual push/pull buttons in product editor.', 'hubspot-ecommerce'); ?><br>
+                            <?php _e('Pro tier: Automatic scheduled sync from HubSpot + auto-push on save.', 'hubspot-ecommerce'); ?>
+                            <a href="https://baursoftware.com/products/hubspot-ecommerce" target="_blank" style="margin-left: 10px;">
+                                <?php _e('Upgrade to Pro', 'hubspot-ecommerce'); ?> &rarr;
+                            </a>
+                        </p>
+                    </div>
+                <?php endif; ?>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="auto_sync_from_hubspot">
+                                <?php _e('Auto-Sync FROM HubSpot', 'hubspot-ecommerce'); ?>
+                                <?php if (!$is_pro) : ?>
+                                    <span class="pro-badge" style="background: #2271b1; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">PRO</span>
+                                <?php endif; ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" id="auto_sync_from_hubspot" name="hubspot_ecommerce_auto_sync_from_hubspot" value="1"
+                                    <?php checked($auto_sync_from_hubspot, '1'); ?>
+                                    <?php disabled(!$is_pro); ?>>
+                                <?php _e('Automatically pull products from HubSpot on a schedule', 'hubspot-ecommerce'); ?>
+                            </label>
+                            <p class="description">
+                                <?php _e('When enabled, products created in HubSpot will automatically sync to WordPress.', 'hubspot-ecommerce'); ?>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr id="sync-interval-row" style="<?php echo (!$is_pro || !$auto_sync_from_hubspot) ? 'display:none;' : ''; ?>">
+                        <th scope="row">
+                            <label for="sync_interval"><?php _e('Sync Interval', 'hubspot-ecommerce'); ?></label>
+                        </th>
+                        <td>
+                            <select id="sync_interval" name="hubspot_ecommerce_sync_interval" <?php disabled(!$is_pro); ?>>
+                                <option value="hourly" <?php selected($sync_interval, 'hourly'); ?>>
+                                    <?php _e('Hourly', 'hubspot-ecommerce'); ?>
+                                </option>
+                                <option value="twicedaily" <?php selected($sync_interval, 'twicedaily'); ?>>
+                                    <?php _e('Twice Daily', 'hubspot-ecommerce'); ?>
+                                </option>
+                                <option value="daily" <?php selected($sync_interval, 'daily'); ?>>
+                                    <?php _e('Daily', 'hubspot-ecommerce'); ?>
+                                </option>
+                            </select>
+                            <p class="description">
+                                <?php _e('How often to sync products from HubSpot', 'hubspot-ecommerce'); ?>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <label for="auto_push_to_hubspot">
+                                <?php _e('Auto-Push TO HubSpot', 'hubspot-ecommerce'); ?>
+                                <?php if (!$is_pro) : ?>
+                                    <span class="pro-badge" style="background: #2271b1; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">PRO</span>
+                                <?php endif; ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" id="auto_push_to_hubspot" name="hubspot_ecommerce_auto_push_products" value="1"
+                                    <?php checked($auto_push_to_hubspot, '1'); ?>
+                                    <?php disabled(!$is_pro); ?>>
+                                <?php _e('Automatically push products to HubSpot when saved in WordPress', 'hubspot-ecommerce'); ?>
+                            </label>
+                            <p class="description">
+                                <?php _e('When enabled, saving a product in WordPress will automatically sync it to HubSpot.', 'hubspot-ecommerce'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <script>
+                jQuery(document).ready(function($) {
+                    $('#auto_sync_from_hubspot').on('change', function() {
+                        if ($(this).is(':checked')) {
+                            $('#sync-interval-row').show();
+                        } else {
+                            $('#sync-interval-row').hide();
+                        }
+                    });
+                });
+                </script>
+
 
                 <h2><?php _e('Shop Pages', 'hubspot-ecommerce'); ?></h2>
                 <table class="form-table">

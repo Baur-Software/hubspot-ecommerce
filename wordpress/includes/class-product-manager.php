@@ -27,10 +27,21 @@ class HubSpot_Ecommerce_Product_Manager {
         // Schedule product sync
         add_action('hubspot_ecommerce_sync_products', [$this, 'sync_products']);
 
-        // Schedule sync if not already scheduled
-        if (!wp_next_scheduled('hubspot_ecommerce_sync_products')) {
-            $interval = get_option('hubspot_ecommerce_sync_interval', 'hourly');
-            wp_schedule_event(time(), $interval, 'hubspot_ecommerce_sync_products');
+        // Schedule automatic sync only if Pro and enabled (Pro feature)
+        $license_manager = HubSpot_Ecommerce_License_Manager::instance();
+        $auto_sync_enabled = get_option('hubspot_ecommerce_auto_sync_from_hubspot', false);
+
+        if ($license_manager->can_use_auto_sync() && $auto_sync_enabled) {
+            if (!wp_next_scheduled('hubspot_ecommerce_sync_products')) {
+                $interval = get_option('hubspot_ecommerce_sync_interval', 'hourly');
+                wp_schedule_event(time(), $interval, 'hubspot_ecommerce_sync_products');
+            }
+        } else {
+            // Clear scheduled sync if not Pro or disabled
+            $timestamp = wp_next_scheduled('hubspot_ecommerce_sync_products');
+            if ($timestamp) {
+                wp_unschedule_event($timestamp, 'hubspot_ecommerce_sync_products');
+            }
         }
 
         // Add custom columns to products admin
