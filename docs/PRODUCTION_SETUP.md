@@ -69,6 +69,7 @@ if (getenv('HUBSPOT_LICENSE_CONSUMER_SECRET')) {
 4. Add them to `wp-config.php` as shown above
 
 **Current Development Values:**
+
 - Client ID: `b4cf1036-14c9-4e46-a976-be06e31f2a78`
 - Client Secret: `8651ec90-6c28-41a4-8c36-82c9f5694936`
 
@@ -235,6 +236,7 @@ if (!defined('HUBSPOT_OAUTH_CLIENT_ID')) {
 **Symptom:** "Invalid OAuth state" or redirect fails
 
 **Solutions:**
+
 1. Verify `HUBSPOT_OAUTH_CLIENT_ID` and `HUBSPOT_OAUTH_CLIENT_SECRET` are correct
 2. Check redirect URI in HubSpot Developer App matches your site URL
 3. Ensure HTTPS is enabled
@@ -245,6 +247,7 @@ if (!defined('HUBSPOT_OAUTH_CLIENT_ID')) {
 **Symptom:** "Failed to verify license" or stuck on "Free" tier
 
 **Solutions:**
+
 1. Verify `HUBSPOT_LICENSE_CONSUMER_KEY` and `HUBSPOT_LICENSE_CONSUMER_SECRET` are correct
 2. Check license server (baursoftware.com) is accessible
 3. Verify license key is valid in License Manager admin
@@ -255,6 +258,7 @@ if (!defined('HUBSPOT_OAUTH_CLIENT_ID')) {
 **Symptom:** Plugin still using fallback/placeholder credentials
 
 **Solutions:**
+
 1. Verify constants are defined **before** `wp-settings.php` loads
 2. Check for PHP syntax errors in `wp-config.php`
 3. Use `var_dump(HUBSPOT_OAUTH_CLIENT_ID)` to verify constant is defined
@@ -264,9 +268,9 @@ if (!defined('HUBSPOT_OAUTH_CLIENT_ID')) {
 
 ## Additional Resources
 
-- **HubSpot Developer Docs:** https://developers.hubspot.com/docs/api/oauth
-- **License Manager Plugin:** https://www.licensemanager.at/
-- **WordPress.org Security:** https://wordpress.org/support/article/hardening-wordpress/
+- **HubSpot Developer Docs:** <https://developers.hubspot.com/docs/api/oauth>
+- **License Manager Plugin:** <https://www.licensemanager.at/>
+- **WordPress.org Security:** <https://wordpress.org/support/article/hardening-wordpress/>
 
 ---
 
@@ -276,7 +280,7 @@ If you encounter issues:
 
 1. Check WordPress debug logs: `wp-content/debug.log`
 2. Enable WP_DEBUG in `wp-config.php` temporarily
-3. Contact support@baursoftware.com with:
+3. Contact <support@baursoftware.com> with:
    - Error messages from logs
    - Steps to reproduce
    - WordPress version

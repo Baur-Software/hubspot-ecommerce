@@ -12,12 +12,14 @@
 **File:** `includes/class-oauth-client.php`
 
 **Before:**
+
 ```php
 const CLIENT_ID = 'b4cf1036-14c9-4e46-a976-be06e31f2a78';
 const CLIENT_SECRET = '8651ec90-6c28-41a4-8c36-82c9f5694936';
 ```
 
 **After:**
+
 ```php
 private function get_client_id() {
     if (defined('HUBSPOT_OAUTH_CLIENT_ID')) {
@@ -37,6 +39,7 @@ private function get_client_secret() {
 ```
 
 **Benefits:**
+
 - Production sites can override credentials via `wp-config.php`
 - Development still works with fallback values
 - No breaking changes to existing code
@@ -49,12 +52,14 @@ private function get_client_secret() {
 **File:** `includes/class-license-manager.php`
 
 **Before:**
+
 ```php
 const CONSUMER_KEY = 'ck_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 const CONSUMER_SECRET = 'cs_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 ```
 
 **After:**
+
 ```php
 private function get_consumer_key() {
     if (defined('HUBSPOT_LICENSE_CONSUMER_KEY')) {
@@ -76,6 +81,7 @@ private function get_consumer_secret() {
 All 4 API calls updated to use `$this->get_consumer_key()` and `$this->get_consumer_secret()`.
 
 **Benefits:**
+
 - License server credentials never in code
 - Production credentials only in `wp-config.php`
 - Clear error when not configured (placeholders won't work)
@@ -90,6 +96,7 @@ All 4 API calls updated to use `$this->get_consumer_key()` and `$this->get_consu
 **Status:** No commits yet - clean slate!
 
 **Files Already Protected:**
+
 - `.gitignore` already includes `hubspot.config.yml`
 - `.gitignore` already includes `.env`
 - No sensitive data ever committed
@@ -101,7 +108,9 @@ All 4 API calls updated to use `$this->get_consumer_key()` and `$this->get_consu
 ## New Documentation Created
 
 ### 1. `PRODUCTION_SETUP.md`
+
 Comprehensive production deployment guide:
+
 - How to configure wp-config.php
 - How to use environment variables
 - WP Engine-specific instructions
@@ -110,7 +119,9 @@ Comprehensive production deployment guide:
 - Troubleshooting guide
 
 ### 2. `wp-config-example.php`
+
 Ready-to-use wp-config.php snippet:
+
 - All required constants with comments
 - Alternative environment variable method
 - Development vs production notes
@@ -123,6 +134,7 @@ Ready-to-use wp-config.php snippet:
 ### For Development (Works Out of Box)
 
 No configuration needed! Fallback values allow:
+
 - ✅ OAuth connection to HubSpot
 - ✅ Product sync
 - ✅ Contact/deal creation
@@ -147,12 +159,14 @@ define('HUBSPOT_OAUTH_CLIENT_SECRET', 'your_custom_app_secret');
 ## Security Posture - Before vs After
 
 ### Before
+
 - ❌ OAuth credentials hardcoded in source
 - ❌ License credentials hardcoded as placeholders
 - ⚠️ No way to override credentials per environment
 - ⚠️ Potential exposure if code pushed to public repo
 
 ### After
+
 - ✅ All credentials configurable via wp-config.php
 - ✅ Environment variable support for hosting platforms
 - ✅ Development fallbacks for easy testing
@@ -165,11 +179,13 @@ define('HUBSPOT_OAUTH_CLIENT_SECRET', 'your_custom_app_secret');
 ## Testing Checklist
 
 ### OAuth Flow (No Config Needed)
+
 - [x] Code changes don't break existing OAuth
 - [x] Fallback credentials work for development
 - [x] Can override via wp-config.php if needed
 
 ### License Verification (Requires Config)
+
 - [ ] Placeholder credentials fail gracefully
 - [ ] Real credentials work when added to wp-config.php
 - [ ] License activation succeeds with proper config
@@ -203,6 +219,7 @@ define('HUBSPOT_OAUTH_CLIENT_SECRET', 'your_custom_app_secret');
 ## Git Status
 
 ### Main Plugin Repository
+
 ```bash
 # Modified files (ready to commit):
 M includes/class-oauth-client.php
@@ -215,6 +232,7 @@ M includes/class-license-manager.php
 ```
 
 ### Companion App Repository
+
 ```bash
 # No commits yet - clean slate
 # hubspot.config.yml already in .gitignore
@@ -225,6 +243,7 @@ M includes/class-license-manager.php
 ## Next Steps
 
 ### Immediate (Before Push to GitHub)
+
 - [x] All credentials secured
 - [x] Documentation created
 - [ ] Test OAuth with fallback credentials
@@ -232,6 +251,7 @@ M includes/class-license-manager.php
 - [ ] Create commit with security improvements
 
 ### Before Launch
+
 - [ ] Set up license server on baursoftware.com
 - [ ] Generate real REST API credentials
 - [ ] Add to production wp-config.php
@@ -264,10 +284,12 @@ M includes/class-license-manager.php
 ## Support Impact
 
 ### Before
+
 - Support requests: "Where do I put my API keys?"
 - Answer: "Edit the plugin files" ❌ (dangerous)
 
 ### After
+
 - Support requests: "Where do I put my API keys?"
 - Answer: "See PRODUCTION_SETUP.md - add to wp-config.php" ✅ (safe)
 
@@ -276,6 +298,7 @@ M includes/class-license-manager.php
 **Status:** Ready for GitHub push and production deployment!
 
 **Recommendation:** Proceed with:
+
 1. Commit these changes
 2. Push to GitHub (no secrets will be exposed)
 3. Set up license server

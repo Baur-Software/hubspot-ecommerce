@@ -68,26 +68,31 @@ hubspot-ecommerce/                  # Root monorepo
 ## Benefits
 
 ### 1. Unified Version Management
+
 - Single version number for both plugin and app
 - Coordinated releases
 - Clear compatibility matrix
 
 ### 2. Shared Dependencies
+
 - Common dev dependencies (Playwright, ESLint, etc.)
 - Shared configuration files
 - Centralized CI/CD
 
 ### 3. Easier Development
+
 - Single `git clone` gets everything
 - Test both components together
 - Shared documentation
 
 ### 4. Better GitHub Actions
+
 - Deploy both components in one workflow
 - Coordinated releases
 - Single build pipeline
 
 ### 5. Simplified Customer Onboarding
+
 - One repository to fork/download
 - Clear project structure
 - Comprehensive documentation in one place
@@ -252,6 +257,7 @@ npm run test:hubspot
 
 GPL-2.0-or-later
 EOF
+
 ```
 
 ### Phase 5: Update GitHub Actions (30 min)
@@ -318,13 +324,16 @@ chmod +x scripts/deploy-all.sh
 Update all internal references:
 
 **WordPress plugin wp-config references:**
+
 - No changes needed (paths relative to plugin root)
 
 **GitHub Actions workflows:**
+
 - Update `working-directory: wordpress` where needed
 - Update `working-directory: hubspot-app` where needed
 
 **Documentation cross-references:**
+
 - Update links to point to new locations
 - Update relative paths in markdown
 
@@ -333,11 +342,13 @@ Update all internal references:
 ## Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Backup entire wp-plugins directory
 - [ ] Commit all changes in both repos
 - [ ] Note any local-only files not in git
 
 ### Structure Changes
+
 - [ ] Create new directory structure
 - [ ] Move WordPress plugin to /wordpress
 - [ ] Move companion app to /hubspot-app
@@ -346,6 +357,7 @@ Update all internal references:
 - [ ] Set up root package.json
 
 ### Configuration Updates
+
 - [ ] Update .gitignore (root level)
 - [ ] Update GitHub Actions workflows
 - [ ] Update all path references
@@ -353,6 +365,7 @@ Update all internal references:
 - [ ] Create CONTRIBUTING.md
 
 ### Testing
+
 - [ ] Test WordPress plugin still works
 - [ ] Test composer install in /wordpress
 - [ ] Test npm install in root
@@ -360,12 +373,14 @@ Update all internal references:
 - [ ] Test deployment scripts
 
 ### Cleanup
+
 - [ ] Remove old ../hubspot-ecommerce-app directory
 - [ ] Remove duplicate files
 - [ ] Remove old GitHub workflows
 - [ ] Update .claude settings if needed
 
 ### Post-Migration
+
 - [ ] Update git remote (if needed)
 - [ ] Create new release/tag
 - [ ] Update documentation links
@@ -536,6 +551,7 @@ Use semantic versioning with synchronized versions:
 ```
 
 When releasing:
+
 1. Update version in root package.json
 2. Update version in wordpress/hubspot-ecommerce.php
 3. Update version in hubspot-app/package.json

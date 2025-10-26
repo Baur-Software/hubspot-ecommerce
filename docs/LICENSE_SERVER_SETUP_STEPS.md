@@ -1,7 +1,7 @@
 # License Server Setup - Step-by-Step Guide
 
-**Site:** http://baur-software.local
-**Admin:** http://baur-software.local/wp-admin
+**Site:** <http://baur-software.local>
+**Admin:** <http://baur-software.local/wp-admin>
 **Username:** baursoftware
 **Password:** Glade123!@
 
@@ -68,6 +68,7 @@
 2. **Product Details:**
    - Product name: **HubSpot Ecommerce Pro**
    - Description:
+
      ```
      Unlock the full power of HubSpot Commerce Hub integration.
 
@@ -77,7 +78,9 @@
      - Email preference sync
      - Priority email support
      ```
+
    - Short description:
+
      ```
      Full-featured HubSpot ecommerce integration for WordPress. $39/month.
      ```
@@ -105,6 +108,7 @@
 2. **Product Details:**
    - Product name: **HubSpot Ecommerce Enterprise**
    - Description:
+
      ```
      Enterprise-level HubSpot integration for growing businesses.
 
@@ -116,7 +120,9 @@
      - Dedicated account manager
      - 5 hours custom development/month
      ```
+
    - Short description:
+
      ```
      Enterprise HubSpot ecommerce solution. White-glove service. $99/month.
      ```
@@ -210,6 +216,7 @@
 5. Click **Generate API Key**
 
 6. **IMPORTANT - Copy These Immediately:**
+
    ```
    Consumer Key: ck_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    Consumer Secret: cs_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -259,6 +266,7 @@ If you want to test quickly without wp-config:
 2. Find the `get_consumer_key()` function (around line 28)
 
 3. Replace the placeholder with your real key:
+
 ```php
 return 'ck_YOUR_REAL_KEY_HERE';
 ```
@@ -273,7 +281,7 @@ return 'ck_YOUR_REAL_KEY_HERE';
 
 ### Step 7.1: Purchase Test Subscription
 
-1. Go to **Products** page on frontend: http://baur-software.local/shop/
+1. Go to **Products** page on frontend: <http://baur-software.local/shop/>
 2. Click on "HubSpot Ecommerce Pro"
 3. Click **Add to cart**
 4. Click **View cart**
@@ -282,7 +290,7 @@ return 'ck_YOUR_REAL_KEY_HERE';
 6. **Billing Details:**
    - First name: Test
    - Last name: User
-   - Email: your-email@example.com (use real email to receive license)
+   - Email: <your-email@example.com> (use real email to receive license)
    - Phone: 555-555-5555
 
 7. **Payment:**
@@ -354,7 +362,8 @@ If emails aren't arriving:
 4. Test email delivery
 
 For local development, you can also use **MailHog** (included with Local):
-- View emails at: http://baur-software.local:8025
+
+- View emails at: <http://baur-software.local:8025>
 
 ---
 
@@ -464,7 +473,7 @@ For local development, you can also use **MailHog** (included with Local):
    - For local testing: `http://baur-software.local/wp-json/lmfwc/v2/licenses`
 
 2. Check WordPress REST API is enabled:
-   - Visit: http://baur-software.local/wp-json/
+   - Visit: <http://baur-software.local/wp-json/>
    - Should return JSON, not 404
 
 ---

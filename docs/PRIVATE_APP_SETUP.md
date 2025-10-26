@@ -11,7 +11,7 @@ HubSpot deprecated API keys in 2022 and now recommends using Private Apps for cu
 
 ## Creating a Private App
 
-###  1. Go to HubSpot Settings
+### 1. Go to HubSpot Settings
 
 1. Log into your HubSpot account
 2. Click the **Settings** gear icon (top right)
@@ -30,6 +30,7 @@ HubSpot deprecated API keys in 2022 and now recommends using Private Apps for cu
 Click the **Scopes** tab and enable these permissions:
 
 #### CRM Scopes (Required)
+
 - ✅ `crm.objects.contacts.read` - Read contacts
 - ✅ `crm.objects.contacts.write` - Create/update contacts
 - ✅ `crm.objects.deals.read` - Read deals (orders)
@@ -40,9 +41,11 @@ Click the **Scopes** tab and enable these permissions:
 - ✅ `crm.schemas.line_items.read` - Read line item schemas
 
 #### Commerce Scopes (Required for Subscriptions)
+
 - ✅ `crm.objects.subscriptions.read` - Read subscriptions
 
 #### Communication Scopes (Optional - for email subscriptions)
+
 - ✅ `communication_preferences.read` - Read email subscription types
 - ✅ `communication_preferences.write` - Subscribe/unsubscribe contacts
 
@@ -103,6 +106,7 @@ To revoke all access:
 ### "No products found" After Sync
 
 **Causes**:
+
 1. No products in HubSpot → Create products in HubSpot first
 2. Missing `crm.objects.products.read` scope → Add scope and get new token
 3. Products are archived → Un-archive products in HubSpot
@@ -114,6 +118,7 @@ To revoke all access:
 ### Products Sync But No Subscriptions
 
 **Solution**: Make sure your products in HubSpot have these properties set:
+
 - `hs_recurring_billing_period`
 - `recurringbillingfrequency`
 - `hs_billing_period_units`

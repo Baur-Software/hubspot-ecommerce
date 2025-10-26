@@ -84,6 +84,7 @@ git push origin main
 ```
 
 **What happens:**
+
 - Automatically validates code
 - Runs security checks
 - Deploys to development HubSpot portal
@@ -110,6 +111,7 @@ git push origin main
 5. Click **"Run workflow"**
 
 **What happens:**
+
 - Validates portal ID
 - Creates pre-deployment backup
 - Deploys app to customer's HubSpot
@@ -134,6 +136,7 @@ git push origin v1.0.0
 ```
 
 **What happens:**
+
 - Deploys to production environment
 - Creates deployment artifact (tar.gz)
 - Attaches artifact to GitHub release
@@ -196,6 +199,7 @@ notify_customer:
 #### 1. Obtain Customer Information
 
 Collect from customer:
+
 - ✅ HubSpot Portal ID
 - ✅ Contact email for notifications
 - ✅ Deployment window preferences (timezone)
@@ -210,6 +214,7 @@ Collect from customer:
    - Name: **HubSpot Ecommerce Integration**
    - Description: **WordPress ecommerce integration**
 4. Required scopes:
+
    ```
    developer.app.deploy
    developer.app.read
@@ -221,6 +226,7 @@ Collect from customer:
    crm.objects.line_items.write
    e-commerce
    ```
+
 5. Click **Create app** and copy Personal Access Key
 
 #### 3. Add Customer to GitHub Secrets
@@ -311,17 +317,20 @@ CUSTOMER_NAME=development
 Set in GitHub repository settings:
 
 **Development:**
+
 ```
 HUBSPOT_PORTAL_ID
 HUBSPOT_PERSONAL_ACCESS_KEY
 ```
 
 **Per-Customer:**
+
 ```
 CUSTOMER_{PORTAL_ID}_PAK
 ```
 
 **Optional (for notifications):**
+
 ```
 SLACK_WEBHOOK_URL
 EMAIL_API_KEY
@@ -363,11 +372,13 @@ SENDGRID_API_KEY
 ### Deployment Fails: Authentication Error
 
 **Error:**
+
 ```
 Error: Unable to authenticate with HubSpot
 ```
 
 **Solution:**
+
 1. Verify Personal Access Key is correct in GitHub Secrets
 2. Check PAK has required scopes (`developer.app.deploy`)
 3. Ensure PAK hasn't expired
@@ -378,11 +389,13 @@ Error: Unable to authenticate with HubSpot
 ### Deployment Fails: Invalid Portal ID
 
 **Error:**
+
 ```
 Error: Portal ID not found
 ```
 
 **Solution:**
+
 1. Verify Portal ID is correct (8-digit number)
 2. Check customer's HubSpot account is active
 3. Ensure you're deploying to correct environment
@@ -394,6 +407,7 @@ Error: Portal ID not found
 **Issue:** App deployed successfully but not visible
 
 **Solution:**
+
 1. Log into customer's HubSpot portal
 2. Go to **Marketplace → Manage Apps**
 3. Check if app is in "Installed" section
@@ -410,6 +424,7 @@ Error: Portal ID not found
 **Issue:** WordPress plugin can't connect via OAuth
 
 **Solution:**
+
 1. Verify OAuth scopes in `src/app/app-hsmeta.json`
 2. Check redirect URIs are correct
 3. Ensure customer app is activated
@@ -481,6 +496,7 @@ jobs:
 **Location:** GitHub Actions → Workflow run → Artifacts
 
 **Download:**
+
 ```bash
 # Via GitHub CLI
 gh run download <run-id>
@@ -490,6 +506,7 @@ Actions → Workflow run → Artifacts section
 ```
 
 **Log Format:**
+
 ```json
 {
   "customer": "Acme Corp",
@@ -526,6 +543,7 @@ Add to workflow:
 ### Secret Management
 
 ✅ **DO:**
+
 - Store all credentials in GitHub Secrets
 - Use separate PAKs per customer
 - Rotate PAKs every 90 days
@@ -533,6 +551,7 @@ Add to workflow:
 - Use environment-specific secrets
 
 ❌ **DON'T:**
+
 - Commit credentials to code
 - Share PAKs across customers
 - Use admin-level PAKs for deployment
@@ -550,6 +569,7 @@ Add to workflow:
 ## Support & Resources
 
 ### Documentation
+
 - [HubSpot CLI Documentation](https://developers.hubspot.com/docs/cli/getting-started)
 - [HubSpot App Deployment](https://developers.hubspot.com/docs/platform/create-an-app)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
@@ -600,6 +620,7 @@ A: Yes, add a `schedule` trigger to the workflow with cron syntax.
 ## Changelog
 
 ### v1.0.0 (2025-01-24)
+
 - Initial deployment workflows
 - Customer onboarding process
 - Validation and testing pipeline

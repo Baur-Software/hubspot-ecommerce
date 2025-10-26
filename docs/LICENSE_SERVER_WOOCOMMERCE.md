@@ -11,17 +11,18 @@ Use baursoftware.com (WPEngine) with WooCommerce + License Manager plugin to han
 ### Step 1: Install Required Plugins
 
 **Required:**
+
 1. **WooCommerce** (free)
-   - https://wordpress.org/plugins/woocommerce/
+   - <https://wordpress.org/plugins/woocommerce/>
 
 2. **License Manager for WooCommerce** (free)
-   - https://wordpress.org/plugins/license-manager-for-woocommerce/
+   - <https://wordpress.org/plugins/license-manager-for-woocommerce/>
    - Provides REST API for license verification
    - Auto-generates license keys
    - Handles activation/deactivation
 
 3. **WooCommerce Subscriptions** ($199/year)
-   - https://woocommerce.com/products/woocommerce-subscriptions/
+   - <https://woocommerce.com/products/woocommerce-subscriptions/>
    - Enables recurring billing
    - Handles renewals/cancellations
    - **Alternative (Free):** Use Stripe Billing directly
@@ -40,12 +41,14 @@ Use baursoftware.com (WPEngine) with WooCommerce + License Manager plugin to han
 ### Step 3: Configure License Manager
 
 **Settings → License Manager → General:**
+
 - Enable REST API: ✅
 - License key format: `BSHS-{RANDOM:4}-{RANDOM:4}-{RANDOM:4}`
 - Expires after: Based on subscription
 - Max activations: 1 (1 site per license)
 
 **Settings → License Manager → REST API:**
+
 - Enable API: ✅
 - Generate API keys for authentication
 
@@ -56,35 +59,41 @@ Use baursoftware.com (WPEngine) with WooCommerce + License Manager plugin to han
 #### Product 1: HubSpot Ecommerce Pro
 
 **General:**
+
 - Product name: HubSpot Ecommerce Pro
 - Price: $39/month
 - Type: Subscription product
 - Billing cycle: Every 1 month
 
 **License Manager Settings:**
+
 - Deliver license keys: ✅
 - License uses: 1 (max 1 activation)
 - Expires: When subscription cancelled
 - Pattern: `BSHS-{RANDOM:4}-{RANDOM:4}-{RANDOM:4}`
 
 **Product Meta:**
+
 - Set tier: `pro`
 
 #### Product 2: HubSpot Ecommerce Enterprise
 
 **General:**
+
 - Product name: HubSpot Ecommerce Enterprise
 - Price: $99/month
 - Type: Subscription product
 - Billing cycle: Every 1 month
 
 **License Manager Settings:**
+
 - Deliver license keys: ✅
 - License uses: 1 (max 1 activation)
 - Expires: When subscription cancelled
 - Pattern: `BSHS-{RANDOM:4}-{RANDOM:4}-{RANDOM:4}`
 
 **Product Meta:**
+
 - Set tier: `enterprise`
 
 ---
@@ -92,6 +101,7 @@ Use baursoftware.com (WPEngine) with WooCommerce + License Manager plugin to han
 ### Step 5: API Authentication
 
 **Generate API Key:**
+
 1. Go to License Manager → Settings → REST API
 2. Click "Create new API key"
 3. Label: "HubSpot Ecommerce Plugin"
@@ -110,6 +120,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 **Endpoint:** `POST /licenses/validate`
 
 **Request:**
+
 ```json
 {
   "license_key": "BSHS-1234-5678-9ABC"
@@ -117,6 +128,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 ```
 
 **Response (Valid):**
+
 ```json
 {
   "success": true,
@@ -133,6 +145,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 ```
 
 **Response (Invalid):**
+
 ```json
 {
   "success": false,
@@ -147,6 +160,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 **Endpoint:** `POST /licenses/activate`
 
 **Request:**
+
 ```json
 {
   "license_key": "BSHS-1234-5678-9ABC",
@@ -155,6 +169,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 ```
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -167,6 +182,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 ```
 
 **Response (Already Activated):**
+
 ```json
 {
   "success": false,
@@ -181,6 +197,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 **Endpoint:** `POST /licenses/deactivate`
 
 **Request:**
+
 ```json
 {
   "license_key": "BSHS-1234-5678-9ABC",
@@ -189,6 +206,7 @@ Base URL: `https://baursoftware.com/wp-json/lmfwc/v2`
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -401,7 +419,7 @@ class HubSpot_Ecommerce_License_Manager {
 
 ## Customer Purchase Flow
 
-1. **Customer visits:** https://baursoftware.com/hubspot-ecommerce-pricing/
+1. **Customer visits:** <https://baursoftware.com/hubspot-ecommerce-pricing/>
 2. **Clicks:** "Buy Pro - $39/month"
 3. **Checkout:** WooCommerce checkout with Stripe
 4. **Payment:** Stripe processes $39/month subscription
@@ -417,6 +435,7 @@ class HubSpot_Ecommerce_License_Manager {
 ## Monthly Billing
 
 **WooCommerce Subscriptions handles:**
+
 - ✅ Monthly recurring charges via Stripe
 - ✅ Automatic renewal emails
 - ✅ Failed payment handling
@@ -424,6 +443,7 @@ class HubSpot_Ecommerce_License_Manager {
 - ✅ License expiration on cancellation
 
 **When subscription cancelled:**
+
 - License Manager auto-expires license
 - Next daily check in plugin → reverts to Free tier
 - Customer can continue using Free features
@@ -433,11 +453,13 @@ class HubSpot_Ecommerce_License_Manager {
 ## Cost Comparison
 
 ### Option A: Custom License Server
+
 - Development: 40 hours × $100/hr = **$4,000**
 - Maintenance: Ongoing
 - Total: **$4,000+**
 
 ### Option B: WooCommerce + License Manager
+
 - WooCommerce: **Free**
 - License Manager: **Free**
 - WooCommerce Subscriptions: **$199/year**
@@ -468,12 +490,14 @@ class HubSpot_Ecommerce_License_Manager {
 If you don't want to pay $199/year for WooCommerce Subscriptions:
 
 **Use Stripe Billing Portal:**
+
 - Create products in Stripe dashboard
 - Use Stripe Checkout for purchases
 - Handle webhooks to create license keys
 - Customers manage subscriptions via Stripe portal
 
 **This requires:**
+
 - Custom webhook handler on baursoftware.com
 - Manual license creation on subscription
 - About 4 hours of development
@@ -487,6 +511,7 @@ Still cheaper than WooCommerce Subscriptions but less polished UX.
 **Use WooCommerce + License Manager for WooCommerce**
 
 Reasons:
+
 1. ✅ Setup in 2 hours vs 40 hours custom development
 2. ✅ Proven, battle-tested solution (100k+ active sites)
 3. ✅ Free (except WooCommerce Subscriptions $199/year)

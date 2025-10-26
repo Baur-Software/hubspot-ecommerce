@@ -61,6 +61,7 @@ For each customer you'll deploy to:
 3. Add secret with name: `CUSTOMER_{PORTAL_ID}_PAK`
 
 **Example:**
+
 - Customer Portal ID: `12345678`
 - Secret Name: `CUSTOMER_12345678_PAK`
 - Secret Value: (their Personal Access Key)
@@ -82,6 +83,7 @@ git push origin main
 ```
 
 **What happens:**
+
 - GitHub Actions automatically runs
 - Validates code
 - Deploys to development HubSpot portal
@@ -103,6 +105,7 @@ git push origin main
 ### First Time Customer Setup
 
 **Prerequisites:**
+
 - Customer's Portal ID
 - Customer's Personal Access Key (from their Private App)
 - Added to GitHub Secrets as `CUSTOMER_{PORTAL_ID}_PAK`
@@ -113,12 +116,14 @@ git push origin main
 2. Select **"Deploy to Customer Tenant"**
 3. Click **Run workflow**
 4. Fill in:
+
    ```
    Customer Portal ID: 12345678
    Customer Name: Acme Corp
    Deployment Type: initial_deployment
    Notify Customer: ✅
    ```
+
 5. Click **Run workflow**
 6. Monitor progress (~2-5 minutes)
 
@@ -142,6 +147,7 @@ git push origin main
 ### Test OAuth Connection
 
 From WordPress plugin:
+
 1. Go to **HubSpot Shop → Connect to HubSpot**
 2. Click "Connect"
 3. Should redirect to HubSpot authorization
@@ -183,6 +189,7 @@ git push origin v1.0.0
 ```
 
 **What happens:**
+
 - GitHub Actions deploys to production
 - Creates release on GitHub
 - Attaches deployment artifact (tar.gz)
@@ -242,11 +249,13 @@ git checkout v1.0.0
 ### Deployment Fails: Authentication Error
 
 **Error in logs:**
+
 ```
 Error: Unable to authenticate with HubSpot
 ```
 
 **Fix:**
+
 1. Check GitHub Secret `HUBSPOT_PERSONAL_ACCESS_KEY` is correct
 2. Verify PAK hasn't expired
 3. Ensure PAK has `developer.app.deploy` scope
@@ -256,6 +265,7 @@ Error: Unable to authenticate with HubSpot
 **Issue:** Push to main doesn't trigger deployment
 
 **Fix:**
+
 1. Check `.github/workflows/` directory exists
 2. Verify workflow files are valid YAML
 3. Check GitHub Actions is enabled:
@@ -265,11 +275,13 @@ Error: Unable to authenticate with HubSpot
 ### Customer Secret Not Found
 
 **Error:**
+
 ```
 Error: Secret CUSTOMER_12345678_PAK not found
 ```
 
 **Fix:**
+
 1. Go to Settings → Secrets → Actions
 2. Add secret: `CUSTOMER_12345678_PAK`
 3. Re-run workflow
@@ -278,14 +290,16 @@ Error: Secret CUSTOMER_12345678_PAK not found
 
 ## Security Best Practices
 
-### ✅ DO:
+### ✅ DO
+
 - Use GitHub Secrets for all credentials
 - Rotate PAKs every 90 days
 - Use separate PAKs per environment
 - Enable 2FA on GitHub account
 - Limit workflow permissions to minimum needed
 
-### ❌ DON'T:
+### ❌ DON'T
+
 - Commit credentials to code
 - Share PAKs between customers
 - Use production PAK for development
@@ -315,6 +329,7 @@ Error: Secret CUSTOMER_12345678_PAK not found
 **Email Notifications:**
 
 Go to: **Settings → Notifications**
+
 - Enable: "Actions" notifications
 - Send to: your email
 

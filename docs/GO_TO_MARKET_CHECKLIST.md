@@ -10,6 +10,7 @@
 ### 🔴 CRITICAL - Must Complete Before ANY Launch
 
 #### 1. License Server Setup (4-6 hours)
+
 **Status:** ⏳ Not Started | **Owner:** Todd | **Blocker:** Yes
 
 - [ ] **Install License Manager on baursoftware.com**
@@ -48,6 +49,7 @@
 ---
 
 #### 2. Security Verification (1 hour)
+
 **Status:** ✅ Complete | **Owner:** Todd | **Blocker:** No
 
 - [x] Remove hardcoded credentials from code
@@ -58,6 +60,7 @@
 - [ ] **Before GitHub Push:** Review all files for accidental secrets
 
 **Files Changed:**
+
 - `includes/class-oauth-client.php` - OAuth credentials secured
 - `includes/class-license-manager.php` - License credentials secured
 - `PRODUCTION_SETUP.md` - New deployment guide
@@ -67,6 +70,7 @@
 ---
 
 #### 3. Companion App UI (24-40 hours) - OPTIONAL FOR MARKETPLACE
+
 **Status:** ⏳ Not Started | **Owner:** TBD | **Blocker:** Only for HubSpot Marketplace
 
 **NOTE:** This is ONLY required if submitting to HubSpot Marketplace. The WordPress plugin works standalone without the companion app.
@@ -89,6 +93,7 @@
   - [ ] Verify UI renders correctly
 
 **Can Skip For Now If:**
+
 - Only launching on WordPress.org
 - Using WordPress plugin standalone
 - Not pursuing HubSpot Marketplace certification
@@ -100,9 +105,11 @@
 ### 🟡 HIGH PRIORITY - Should Complete for Launch
 
 #### 4. Testing & QA (8-12 hours)
+
 **Status:** 🟡 Partial | **Owner:** Todd
 
 ##### WordPress Plugin Tests
+
 - [x] 46 Playwright E2E tests (passing without WordPress)
 - [ ] Run full test suite with WordPress + demo mode
 - [ ] Test OAuth connection on fresh install
@@ -117,6 +124,7 @@
 **Command:** `npm test` (requires WordPress running)
 
 ##### Manual Testing Checklist
+
 - [ ] Fresh WordPress install on Local
 - [ ] Activate plugin
 - [ ] Connect via OAuth
@@ -131,6 +139,7 @@
 ---
 
 #### 5. Documentation (6-8 hours)
+
 **Status:** 🟡 Partial | **Owner:** Todd
 
 - [x] README.md (exists, may need updates)
@@ -155,6 +164,7 @@
 ---
 
 #### 6. Marketing & Sales Pages (4-6 hours)
+
 **Status:** ⏳ Not Started | **Owner:** Todd
 
 - [ ] **Landing page** (baursoftware.com/hubspot-ecommerce)
@@ -182,9 +192,11 @@
 ### 🟢 NICE TO HAVE - Can Launch Without
 
 #### 7. HubSpot Marketplace Submission (Optional)
+
 **Status:** ⏳ Not Started | **Blocker:** Requires companion app UI
 
 **Pre-Certification Requirements (6 months):**
+
 - [ ] 60+ active installs
 - [ ] Listed for 6 months
 - [ ] OAuth implementation complete ✅
@@ -193,6 +205,7 @@
 - [ ] Terms of service published
 
 **Can Proceed Without This:**
+
 - Launch on WordPress.org first
 - Build user base organically
 - Submit to HubSpot Marketplace after hitting 60 installs
@@ -200,6 +213,7 @@
 ---
 
 #### 8. WordPress.org Submission (Recommended)
+
 **Status:** ⏳ Not Started | **Owner:** Todd
 
 - [ ] **Prepare Plugin for Submission**
@@ -219,12 +233,14 @@
   - [ ] Wait for approval (typically 1-3 weeks)
 
 **Benefits:**
+
 - Wider audience reach
 - Built-in update mechanism
 - Credibility and trust
 - Free hosting and CDN
 
 **Can Skip If:**
+
 - Selling exclusively on baursoftware.com
 - Want faster launch (no review wait time)
 - Plan to do manual distribution
@@ -234,6 +250,7 @@
 ## Launch Strategies (Pick One)
 
 ### Option A: Soft Launch (Recommended - 3 Days)
+
 **Best for:** Testing with real users before public launch
 
 1. ✅ Complete license server setup (Day 1)
@@ -249,6 +266,7 @@
 ---
 
 ### Option B: WordPress.org First (5-6 Weeks)
+
 **Best for:** Maximum reach and credibility
 
 1. ✅ Complete license server setup (Week 1)
@@ -263,6 +281,7 @@
 ---
 
 ### Option C: All Channels Simultaneously (6+ Months)
+
 **Best for:** Maximum coverage, requires most resources
 
 1. ✅ Complete license server setup (Month 1)
@@ -280,6 +299,7 @@
 ## Recommended Launch Plan: Soft Launch (3 Days)
 
 ### Day 1: License Server Setup
+
 - [ ] 9 AM: Install WooCommerce + License Manager on baursoftware.com
 - [ ] 10 AM: Create Pro & Enterprise products
 - [ ] 11 AM: Configure license generator
@@ -291,6 +311,7 @@
 - [ ] 5 PM: Test subscription cancellation flow
 
 ### Day 2: Final Testing & Soft Launch
+
 - [ ] 9 AM: Run full Playwright test suite
 - [ ] 10 AM: Manual QA on baursoftware.com Local site
 - [ ] 12 PM: Fix any critical bugs found
@@ -300,6 +321,7 @@
 - [ ] 5 PM: Monitor for support requests
 
 ### Day 3: Beta User Onboarding
+
 - [ ] 9 AM: Send personalized onboarding emails to beta users
 - [ ] 10 AM: Create support channel (email/Slack/Discord)
 - [ ] 12 PM: Monitor installations and usage
@@ -308,12 +330,14 @@
 - [ ] 5 PM: Plan iteration based on feedback
 
 ### Weeks 1-2: Beta Period
+
 - [ ] Daily: Monitor support requests
 - [ ] Daily: Fix bugs as reported
 - [ ] Weekly: Collect user feedback surveys
 - [ ] Week 2: Iterate on features based on feedback
 
 ### Week 3: Prepare for Public Launch
+
 - [ ] Finalize documentation based on beta learnings
 - [ ] Create WordPress.org assets (screenshots, videos)
 - [ ] Prepare readme.txt for WordPress.org
@@ -321,12 +345,14 @@
 - [ ] Plan marketing campaign
 
 ### Week 4-6: WordPress.org Review
+
 - [ ] Wait for approval (1-3 weeks typical)
 - [ ] Address any review feedback
 - [ ] Prepare launch announcement
 - [ ] Create content (blog posts, social media)
 
 ### Week 6+: Public Launch
+
 - [ ] WordPress.org approval received
 - [ ] Public announcement
 - [ ] Marketing push (social, email, communities)
@@ -338,22 +364,26 @@
 ## Revenue Projections
 
 ### Soft Launch Beta (Month 1)
+
 - Free users: 10-20
 - Pro subscribers: 2-3 @ $39/mo = **$78-117 MRR**
 
 ### Month 3 (Post WordPress.org)
+
 - Free users: 50-100
 - Pro subscribers: 10-15 @ $39/mo = **$390-585 MRR**
 - Enterprise: 1 @ $99/mo = **$99 MRR**
 - **Total: ~$500 MRR**
 
 ### Month 6 (Mature Product)
+
 - Free users: 200-500
 - Pro subscribers: 40-50 @ $39/mo = **$1,560-1,950 MRR**
 - Enterprise: 3-5 @ $99/mo = **$297-495 MRR**
 - **Total: ~$2,000 MRR**
 
 ### Year 1 Goal
+
 - Free users: 1,000+
 - Pro subscribers: 100+ @ $39/mo = **$3,900 MRR**
 - Enterprise: 10+ @ $99/mo = **$990 MRR**
@@ -364,18 +394,21 @@
 ## Immediate Next Steps (This Week)
 
 ### Today (Priority 1)
+
 1. ✅ Review security changes (COMPLETE)
 2. ✅ Commit security improvements to git
 3. ⏳ **Set up license server on baursoftware.com** (4-6 hours)
 4. ⏳ **Test license flow end-to-end** (2 hours)
 
 ### This Week (Priority 2)
+
 5. ⏳ Create landing page on baursoftware.com
 6. ⏳ Create pricing page
 7. ⏳ Write user documentation
 8. ⏳ Soft launch to 5-10 beta users
 
 ### Next Week (Priority 3)
+
 9. ⏳ Gather beta feedback
 10. ⏳ Fix critical bugs
 11. ⏳ Prepare WordPress.org submission
@@ -386,12 +419,14 @@
 ## Support Resources Needed
 
 ### Pre-Launch
-- [ ] Support email: support@baursoftware.com (set up forwarder)
+
+- [ ] Support email: <support@baursoftware.com> (set up forwarder)
 - [ ] Documentation site: baursoftware.com/docs
 - [ ] FAQ page
 - [ ] Troubleshooting guide
 
 ### Post-Launch
+
 - [ ] Help desk software (Help Scout, Zendesk) - ~$50/mo
 - [ ] Community forum or Slack/Discord
 - [ ] Video tutorials channel (YouTube)
@@ -401,12 +436,14 @@
 ## Success Metrics to Track
 
 ### Technical KPIs
+
 - OAuth success rate (target: >95%)
 - License verification time (target: <2s)
 - Plugin activation rate (target: >80%)
 - API error rate (target: <1%)
 
 ### Business KPIs
+
 - Free tier installations
 - Free → Pro conversion rate (target: 15-20%)
 - Pro → Enterprise conversion rate (target: 5-10%)
@@ -419,11 +456,13 @@
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **License server downtime** → Set up monitoring, backup server
 - **API rate limits** → Implement caching, retry logic
 - **WordPress compatibility** → Test with popular themes/plugins
 
 ### Business Risks
+
 - **Low conversion rate** → Improve value proposition, add features
 - **High churn** → Improve onboarding, add customer success
 - **Support overwhelm** → Build self-service docs, hire support
@@ -435,6 +474,7 @@
 **Recommendation:** Soft Launch (Option A)
 
 **Reasoning:**
+
 1. ✅ Fastest time to revenue (3 days)
 2. ✅ Learn from real users before public launch
 3. ✅ Iterate based on feedback

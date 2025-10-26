@@ -3,12 +3,15 @@
 ## Test Results Summary
 
 ### Test Account
+
 - **Portal ID**: 244168038
 - **Account Type**: Developer test account with all trials active
 - **App ID**: 22355171
 
 ### OAuth Flow
+
 ✅ **Success** - OAuth authorization flow works perfectly
+
 - Authorization code exchange ✅
 - Access token retrieval ✅
 - Refresh token received ✅
@@ -97,17 +100,20 @@ When we configured the app with 14 scopes, only **9 were actually granted**:
 ### 🚨 Invoices API - NOT Available for Public Apps
 
 According to HubSpot developer community discussions:
+
 - "The scope needed for invoice API calls **isn't available for public use**"
 - Invoice API access is restricted to internal/private apps only
 - Public marketplace apps **cannot access Invoices API via OAuth**
 
 **Impact on Plugin:**
+
 - Invoice features (`create_invoice()`, `update_invoice()`, `get_invoice()`, etc.) will **NOT work** with OAuth
 - Must remove invoice functionality or only support it with Private App tokens
 
 ### ❓ Subscriptions API - Scope Name Unknown
 
 The correct scope for Subscriptions API is unclear:
+
 - Tried: `crm.objects.subscriptions.read` ❌
 - Might be: `crm.schemas.subscriptions.read` (suggested by community)
 - Might be: Included in `e-commerce` but requires Commerce Hub subscription
@@ -116,6 +122,7 @@ The correct scope for Subscriptions API is unclear:
 ### ❓ Communication Preferences API - Scope Name Unknown
 
 The correct scope for Communication Preferences API is unclear:
+
 - Tried: `communication_preferences.read` ❌
 - Scope might have different name
 - Might require special permissions
@@ -125,6 +132,7 @@ The correct scope for Communication Preferences API is unclear:
 ### Option 1: OAuth + Private App Hybrid (Recommended)
 
 **For OAuth (Marketplace App):**
+
 - ✅ Products sync (`e-commerce` scope)
 - ✅ Contact creation/update
 - ✅ Deal (order) creation
@@ -133,12 +141,14 @@ The correct scope for Communication Preferences API is unclear:
 - ❌ Invoices (remove from OAuth flow)
 
 **For Private App (Manual Setup):**
+
 - ✅ All of the above
 - ✅ Subscriptions (if account has Commerce Hub)
 - ✅ Invoices (if account has Commerce Hub)
 - ✅ Full control over all scopes
 
 **Implementation:**
+
 1. Support both authentication methods in plugin
 2. OAuth for easy setup (marketplace)
 3. Private App for advanced features (manual setup)
@@ -160,6 +170,7 @@ The correct scope for Communication Preferences API is unclear:
 ## Next Steps
 
 ### Immediate (Testing)
+
 1. ✅ Test Products API - **WORKING**
 2. ✅ Test Contacts API - **WORKING**
 3. ✅ Test Deals API - **WORKING**
@@ -168,12 +179,14 @@ The correct scope for Communication Preferences API is unclear:
 6. ❌ Test Invoices API - **BLOCKED** (scope not publicly available)
 
 ### Short Term (Development)
+
 1. Decide on authentication strategy (hybrid vs Private App only)
 2. Remove or conditionally hide invoice features
 3. Research alternative subscription access methods
 4. Update WordPress plugin to reflect scope limitations
 
 ### Long Term (Product)
+
 1. Launch with OAuth for basic ecommerce features
 2. Add Private App support for advanced features
 3. Monitor HubSpot API changes for new scope availability
@@ -182,6 +195,7 @@ The correct scope for Communication Preferences API is unclear:
 ## Working Plugin Feature Set (OAuth Only)
 
 ### ✅ Core Features (OAuth Compatible)
+
 - Product sync from HubSpot to WordPress
 - Contact creation when customers checkout
 - Deal (order) creation in HubSpot
@@ -189,6 +203,7 @@ The correct scope for Communication Preferences API is unclear:
 - Basic ecommerce workflow
 
 ### ❌ Advanced Features (Requires Private App)
+
 - Subscription management
 - Invoice creation and management
 - Email subscription preferences sync
@@ -196,11 +211,13 @@ The correct scope for Communication Preferences API is unclear:
 ## Conclusion
 
 **The OAuth flow works perfectly** for the core ecommerce features (products, contacts, deals, line items). However, advanced Commerce Hub features (subscriptions, invoices) are either:
+
 1. **Not available for public OAuth apps** (invoices)
 2. **Using different/unknown scope names** (subscriptions)
 3. **Requiring premium account features** (Commerce Hub subscription)
 
 **Recommended path forward:**
+
 - Launch with OAuth supporting core features
 - Add Private App support for users who need subscriptions/invoices
 - Provide clear documentation on which features require which auth method

@@ -9,6 +9,7 @@ This document outlines the exact code changes needed to add freemium licensing w
 ## Payment Architecture
 
 ### Free Tier (OAuth Authentication)
+
 ```
 Checkout → Create Deal → Create Order → Fire Payment Hook → User Handles Payment
 ```
@@ -16,6 +17,7 @@ Checkout → Create Deal → Create Order → Fire Payment Hook → User Handles
 **User must provide their own payment gateway integration via hooks**
 
 ### Pro Tier (Private App Authentication)
+
 ```
 Checkout → Create Invoice → Get HubSpot Payment Link → Redirect to HubSpot → Auto-paid
 ```
@@ -832,20 +834,24 @@ function my_stripe_webhook_handler($request) {
 
 ## Summary
 
-### New Files to Create:
+### New Files to Create
+
 1. ✅ `includes/class-license-manager.php`
 
-### Files to Modify:
+### Files to Modify
+
 1. ✅ `hubspot-ecommerce.php` - Load license manager
 2. ✅ `includes/class-checkout.php` - Add payment routing
 3. ✅ `includes/class-subscription-manager.php` - Add feature gates
 4. ✅ `includes/class-invoice-manager.php` - Add feature gates
 5. ✅ `includes/admin/class-admin.php` - Add license page
 
-### Hooks Added:
+### Hooks Added
+
 1. ✅ `hubspot_ecommerce_payment_url` - For custom payment gateways (Free tier)
 
-### License Server API:
+### License Server API
+
 - Endpoints needed on baursoftware.com:
   - `POST /wp-json/hubspot-license/v1/verify`
   - `POST /wp-json/hubspot-license/v1/activate`

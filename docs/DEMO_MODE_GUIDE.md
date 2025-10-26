@@ -89,6 +89,7 @@ cd app/public
 ```
 
 **Or using WP-CLI**:
+
 ```bash
 wp option update hubspot_ecommerce_demo_mode 1
 ```
@@ -119,6 +120,7 @@ wp cron event run hubspot_ecommerce_sync_products
 ```
 
 **Or via WordPress Admin**:
+
 - Go to: **HubSpot Shop → Sync Products**
 - Click: **"Sync Products Now"**
 
@@ -136,9 +138,10 @@ wp post create --post_type=page --post_title='My Account' --post_content='[hubsp
 
 ### 5. Verify Demo Mode Active
 
-Visit: https://granttk8org.local/wp-admin
+Visit: <https://granttk8org.local/wp-admin>
 
 You should see a **yellow warning banner**:
+
 ```
 🎭 DEMO MODE ACTIVE
 Using mock HubSpot API responses. No real API calls are being made.
@@ -150,7 +153,7 @@ Using mock HubSpot API responses. No real API calls are being made.
 
 ### 1. View Products
 
-Visit: https://granttk8org.local/shop
+Visit: <https://granttk8org.local/shop>
 
 You should see 3 mock products.
 
@@ -160,7 +163,7 @@ Click any product → **Add to Cart**
 
 ### 3. Checkout Flow
 
-1. View Cart: https://granttk8org.local/cart
+1. View Cart: <https://granttk8org.local/cart>
 2. Proceed to Checkout
 3. Fill in test data
 4. Place Order
@@ -230,6 +233,7 @@ Place a test order
 ### Check 4: Order Creation
 
 Complete checkout - order should be created with:
+
 - Mock deal ID
 - Mock invoice ID
 - Fake payment URL
@@ -308,6 +312,7 @@ wp option get hubspot_ecommerce_demo_mode
 ### Disable Demo Mode
 
 **wp-config.php**:
+
 ```php
 // Comment out or set to false
 // define('HUBSPOT_ECOMMERCE_DEMO_MODE', true);
@@ -315,21 +320,25 @@ define('HUBSPOT_ECOMMERCE_DEMO_MODE', false);
 ```
 
 **WP-CLI**:
+
 ```bash
 wp option delete hubspot_ecommerce_demo_mode
 ```
 
 **Admin**:
+
 - Uncheck "Enable Demo Mode" in settings
 - Add real HubSpot API key
 
 ### Enable Real Mode
 
-1. Get HubSpot API key from: https://app.hubspot.com/
+1. Get HubSpot API key from: <https://app.hubspot.com/>
 2. Add to WordPress:
+
    ```bash
    wp option update hubspot_ecommerce_api_key "YOUR_REAL_API_KEY"
    ```
+
 3. Disable demo mode (see above)
 4. Sync real products
 
@@ -338,15 +347,19 @@ wp option delete hubspot_ecommerce_demo_mode
 ## 📊 Mock Data Details
 
 ### Mock Contact IDs
+
 Format: `mock-contact-{md5(email)}`
 
 ### Mock Deal IDs
+
 Format: `mock-deal-{uniqid()}`
 
 ### Mock Invoice IDs
+
 Format: `mock-invoice-{uniqid()}`
 
 ### Mock Payment URLs
+
 Format: `https://invoice.hubspot.com/payment/mock-{uniqid()}`
 
 ---
@@ -362,7 +375,7 @@ Format: `https://invoice.hubspot.com/payment/mock-{uniqid()}`
 
 ---
 
-## 🚀 Ready to Demo!
+## 🚀 Ready to Demo
 
 **Quick Command Summary**:
 
@@ -378,6 +391,6 @@ cd C:\Users\Todd\Projects\wp-plugins\hubspot-ecommerce
 npm test
 ```
 
-**Visit**: https://granttk8org.local/shop
+**Visit**: <https://granttk8org.local/shop>
 
 **Demo away!** 🎭
