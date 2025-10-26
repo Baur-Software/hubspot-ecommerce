@@ -5,30 +5,35 @@ A full-featured ecommerce plugin that uses HubSpot as the backend for products, 
 ## Features
 
 ### 🛍️ Product Management
+
 - Automatic sync of products from HubSpot
 - Product images, pricing, SKUs, and descriptions
 - Product categories and tags
 - Configurable sync intervals (hourly, twice daily, daily)
 
 ### 🛒 Shopping Cart
+
 - Session-based cart system
 - Add, update, and remove items
 - Real-time cart updates via AJAX
 - Persistent cart storage
 
 ### 💳 Checkout & Orders
+
 - Complete checkout flow
 - Creates deals in HubSpot automatically
 - Associates line items with deals
 - Order history for customers
 
 ### 👤 Customer Management
+
 - Syncs WordPress users to HubSpot contacts (on registration only)
 - Updates contact information on profile changes
 - Customer order history
 - Account dashboard
 
 ### 🔄 Subscription Management
+
 - **Commerce Subscriptions**: Automatic detection of recurring/subscription products from HubSpot
 - **Email Subscription Types**: Full integration with HubSpot marketing subscription preferences
 - Admin interface to sync and manage subscription types
@@ -38,6 +43,7 @@ A full-featured ecommerce plugin that uses HubSpot as the backend for products, 
 - **[Full Subscription Documentation →](SUBSCRIPTIONS.md)**
 
 ### 🎨 Theme Integration
+
 - Optimized for Twenty Twenty-Five theme
 - Uses Twenty Twenty-Five CSS custom properties
 - Template override support
@@ -49,11 +55,13 @@ A full-featured ecommerce plugin that uses HubSpot as the backend for products, 
 ### Production Installation
 
 1. **Upload the plugin**
+
    ```
    wp-content/plugins/hubspot-ecommerce/
    ```
 
 2. **Install dependencies**
+
    ```bash
    cd wp-content/plugins/hubspot-ecommerce/
    composer install
@@ -98,6 +106,7 @@ wp cron event run hubspot_ecommerce_sync_products
 **[Complete Demo Mode Guide →](DEMO_MODE_GUIDE.md)**
 
 Demo mode provides:
+
 - ✅ 3 mock products (Test Widget, Premium Gadget, Subscription Service)
 - ✅ Mock HubSpot API responses
 - ✅ Full checkout flow without real API calls
@@ -112,6 +121,7 @@ Demo mode provides:
 4. Paste it in the plugin settings
 
 **Note**: You need appropriate permissions in HubSpot to:
+
 - Read products
 - Create/update contacts
 - Create/update deals
@@ -128,11 +138,13 @@ Demo mode provides:
 - Default: Hourly
 
 **Manual Sync**
+
 - Go to HubSpot Shop → Sync Products
 - Click "Sync Products Now"
 - Wait for the sync to complete
 
 **Single Product Sync**
+
 - Go to Products in WordPress admin
 - Hover over a product
 - Click "Sync from HubSpot"
@@ -140,15 +152,18 @@ Demo mode provides:
 ### Product Display
 
 **Archive Page**
+
 - Automatically available at `/shop/`
 - Shows all products in a grid layout
 
 **Single Product Page**
+
 - Click any product to view details
 - Shows images, description, price, SKU
 - Add to cart functionality
 
 **Using Shortcodes**
+
 ```
 [hubspot_products limit="8" orderby="date" order="DESC"]
 [hubspot_products category="featured"]
@@ -157,6 +172,7 @@ Demo mode provides:
 ### Shopping Cart
 
 Customers can:
+
 - Add products from any page
 - Update quantities
 - Remove items
@@ -178,6 +194,7 @@ Customers can:
 ### Customer Accounts
 
 When users register on your WordPress site:
+
 - Automatically creates a contact in HubSpot
 - Stores HubSpot contact ID in WordPress
 - Syncs profile updates to HubSpot
@@ -243,6 +260,7 @@ add_filter('hubspot_ecommerce_product_properties', function($properties) {
 ## HubSpot Setup
 
 ### Required Objects
+
 - **Products**: Your product catalog
 - **Contacts**: Customer records
 - **Deals**: Order records
@@ -251,6 +269,7 @@ add_filter('hubspot_ecommerce_product_properties', function($properties) {
 ### Recommended Pipeline Setup
 
 Create a custom pipeline for ecommerce orders:
+
 1. Go to Sales → Deals → Pipelines
 2. Create a new pipeline called "Ecommerce Orders"
 3. Add stages:
@@ -261,6 +280,7 @@ Create a custom pipeline for ecommerce orders:
    - Cancelled
 
 Update the plugin to use your pipeline:
+
 ```php
 // In includes/class-checkout.php, update the create_deal method
 'pipeline' => 'your-pipeline-id'
@@ -269,16 +289,19 @@ Update the plugin to use your pipeline:
 ## Troubleshooting
 
 ### Products not syncing
+
 - Check API key is valid
 - Ensure HubSpot account has products
 - Check error log in HubSpot Shop → Dashboard
 
 ### Orders not creating in HubSpot
+
 - Verify API key has write permissions
 - Check HubSpot deal pipeline exists
 - Review WordPress debug log
 
 ### Cart not working
+
 - Clear browser cookies
 - Check database table exists: `wp_hubspot_cart_items`
 - Verify JavaScript is loading (no console errors)
@@ -307,6 +330,7 @@ npm run test:report
 ```
 
 **Test Coverage:**
+
 - ✅ 20 tests: Framework validation + Code security checks (no WordPress required)
 - ✅ 26 tests: E2E tests for product browsing, checkout, and security (require WordPress)
 
@@ -317,6 +341,7 @@ npm run test:report
 Latest test run: **46/46 tests passing (100%)**
 
 Security validations:
+
 - ✅ SQL injection prevention verified
 - ✅ IDOR protection confirmed
 - ✅ File upload restrictions validated
@@ -328,6 +353,7 @@ Security validations:
 ## Development
 
 ### File Structure
+
 ```
 hubspot-ecommerce/
 ├── hubspot-ecommerce.php           # Main plugin file
@@ -357,6 +383,7 @@ hubspot-ecommerce/
 ### Contributing
 
 This is a starter template. Feel free to:
+
 - Add payment gateway integrations
 - Implement subscription management
 - Add shipping calculations
