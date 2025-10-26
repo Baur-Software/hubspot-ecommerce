@@ -223,7 +223,7 @@
   - [ ] Remove any "powered by" links (or make opt-in)
   - [ ] Create comprehensive readme.txt
   - [ ] Add Tested up to: 6.7 (or latest)
-  - [ ] Add Requires PHP: 8.0
+  - [ ] Add Requires PHP: 8.1
 
 - [ ] **Submit to WordPress.org**
   - [ ] Create SVN repository

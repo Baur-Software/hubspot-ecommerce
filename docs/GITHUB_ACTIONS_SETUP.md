@@ -1,362 +1,246 @@
-# GitHub Actions Setup - Quick Start
+# GitHub Actions CI/CD Setup
 
-Complete guide to setting up automated deployments for the HubSpot companion app.
+Complete guide to the automated testing, validation, and release workflows for the HubSpot Ecommerce WordPress plugin.
 
----
+## Overview
 
-## 1. Initial Repository Setup (5 minutes)
+This project uses GitHub Actions for continuous integration (CI), security scanning, and automated releases. The workflows ensure code quality, security, and reliable plugin distribution.
 
-### Create GitHub Repository
+## Workflows
+
+### 1. CI Workflow (ci.yml)
+
+**Triggers:**
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop` branches
+
+**Jobs:**
+
+**test-wordpress** - Tests the WordPress plugin
+
+- Runs on Ubuntu latest
+- Node.js 20 with npm caching
+- Installs Playwright browsers
+- Runs `npm run test:no-wp` (tests that don't require WordPress environment)
+
+**test-hubspot-app** - Tests the HubSpot companion app
+
+- Runs on Ubuntu latest
+- Node.js 20 with npm caching
+- Installs dependencies and runs tests
+- Currently continues on error until tests are implemented
+
+**lint** - Code quality checks
+
+- Checks for lint scripts in all workspaces
+- Runs linting for root, wordpress, and hubspot-app
+- Continues on error (informational only)
+
+**validate-structure** - Validates plugin structure
+
+- Checks required files exist:
+  - `wordpress/hubspot-ecommerce.php`
+  - `wordpress/composer.json`
+  - `wordpress/README.md`
+  - `package.json`
+- Validates plugin header contains required fields
+
+**Example CI Run:**
 
 ```bash
-cd hubspot-ecommerce-app
+# Push to main triggers CI
+git push origin main
 
-# Initialize git (if not already done)
-git init
-git add .
-git commit -m "Initial commit: HubSpot companion app with GitHub Actions"
-
-# Create repository on GitHub.com
-# Then push:
-git remote add origin https://github.com/YOUR_USERNAME/hubspot-ecommerce-app.git
-git branch -M main
-git push -u origin main
+# Or create PR
+git checkout -b feature/my-feature
+git push origin feature/my-feature
+# Create PR on GitHub
 ```
 
----
+### 2. Security Scan Workflow (security-scan.yml)
 
-## 2. Configure GitHub Secrets (10 minutes)
+**Triggers:**
+- Push to `main` branch
+- Pull requests to `main` branch
+- Weekly schedule (Mondays at 9 AM UTC)
 
-### Development/Testing Secrets
+**Jobs:**
 
-Go to: **Settings → Secrets and variables → Actions → New repository secret**
+**dependency-scan** - Scans dependencies for vulnerabilities
 
-Add these secrets:
+- Runs `npm audit` on all workspaces (root, wordpress, hubspot-app)
+- Runs `composer audit` on WordPress plugin
+- Continues on error (informational)
 
-| Secret Name | Value | Description |
-|-------------|-------|-------------|
-| `HUBSPOT_PORTAL_ID` | `42045718` | Your development HubSpot Portal ID |
-| `HUBSPOT_PERSONAL_ACCESS_KEY` | `YOUR_PAK_HERE` | Your Personal Access Key from HubSpot |
+**secret-scan** - Scans for exposed secrets
 
-### How to Get Personal Access Key
-
-1. Go to **HubSpot → Settings → Integrations → Private Apps**
-2. Click **Create private app**
-3. Name: "Development Deployment"
-4. Scopes needed:
-   - `developer.app.deploy`
-   - `developer.app.read`
-5. Click **Create app**
-6. Copy the Personal Access Key
-7. Add to GitHub Secrets
-
----
-
-## 3. Add Customer Secrets (Per Customer)
-
-For each customer you'll deploy to:
-
-1. Get customer's Portal ID (8-digit number)
-2. Create Private App in their HubSpot (same scopes as above)
-3. Add secret with name: `CUSTOMER_{PORTAL_ID}_PAK`
+- Uses TruffleHog to scan entire repository
+- Only reports verified secrets
+- Checks commit history for leaked credentials
 
 **Example:**
 
-- Customer Portal ID: `12345678`
-- Secret Name: `CUSTOMER_12345678_PAK`
-- Secret Value: (their Personal Access Key)
-
----
-
-## 4. Test Deployment Workflow (5 minutes)
-
-### Automatic Deployment (Push to Main)
-
 ```bash
-# Make a small change
-echo "# Test" >> README.md
-
-# Commit and push
-git add .
-git commit -m "test: trigger deployment"
+# Security scan runs automatically on push to main
 git push origin main
+
+# Or manually trigger via Actions tab:
+# Actions → Security Scan → Run workflow
 ```
 
-**What happens:**
+### 3. Release Workflow (release.yml)
 
-- GitHub Actions automatically runs
-- Validates code
-- Deploys to development HubSpot portal
-- You'll see progress in **Actions** tab
+**Triggers:**
+- Version tags matching `v*.*.*` (e.g., `v1.0.0`, `v1.2.3`)
 
-### Manual Deployment
+**Process:**
 
-1. Go to **Actions** tab
-2. Select "Deploy to HubSpot" workflow
-3. Click **Run workflow**
-4. Select environment: `development`
-5. Click **Run workflow**
-6. Watch progress in real-time
+1. **Build preparation**
+   - Checks out code
+   - Sets up Node.js 20 and PHP 8.1
+   - Extracts version from git tag
 
----
+2. **Dependency installation**
+   - Installs npm dependencies in all workspaces
+   - Runs `composer install --no-dev --optimize-autoloader`
 
-## 5. Deploy to Customer (Manual)
+3. **Version update**
+   - Updates version in plugin header
+   - Updates `HUBSPOT_ECOMMERCE_VERSION` constant
 
-### First Time Customer Setup
+4. **Build plugin**
+   - Creates `build/hubspot-ecommerce/` directory
+   - Copies WordPress plugin files
+   - Removes excluded files per `exclude-from-zip.txt`
+   - Verifies plugin structure
 
-**Prerequisites:**
+5. **Create artifacts**
+   - Creates ZIP archive: `hubspot-ecommerce-{version}.zip`
+   - Generates SHA256 checksum
 
-- Customer's Portal ID
-- Customer's Personal Access Key (from their Private App)
-- Added to GitHub Secrets as `CUSTOMER_{PORTAL_ID}_PAK`
+6. **GitHub Release**
+   - Creates GitHub release with auto-generated notes
+   - Attaches ZIP and checksum files
+   - Marks as prerelease if tag contains `alpha`, `beta`, or `rc`
+   - Uploads artifact (retained for 30 days)
 
-**Deploy:**
-
-1. Go to **Actions** tab
-2. Select **"Deploy to Customer Tenant"**
-3. Click **Run workflow**
-4. Fill in:
-
-   ```
-   Customer Portal ID: 12345678
-   Customer Name: Acme Corp
-   Deployment Type: initial_deployment
-   Notify Customer: ✅
-   ```
-
-5. Click **Run workflow**
-6. Monitor progress (~2-5 minutes)
-
----
-
-## 6. Verify Deployment Success
-
-### Check GitHub Actions
-
-- Green checkmark ✅ = Success
-- Red X ❌ = Failed (click for logs)
-- Download deployment logs from Artifacts
-
-### Check Customer's HubSpot
-
-1. Log into customer's HubSpot portal
-2. Go to **Marketplace → Manage Apps**
-3. Verify "HubSpot Ecommerce for WordPress" appears
-4. Status should be "Active"
-
-### Test OAuth Connection
-
-From WordPress plugin:
-
-1. Go to **HubSpot Shop → Connect to HubSpot**
-2. Click "Connect"
-3. Should redirect to HubSpot authorization
-4. Grant permissions
-5. Should redirect back to WordPress with success
-
----
-
-## 7. Environments (Optional)
-
-For staging/production separation:
-
-1. Go to **Settings → Environments**
-2. Create environments:
-   - `development`
-   - `staging`
-   - `production`
-
-3. Add environment-specific secrets:
-   - Each environment has its own `HUBSPOT_PORTAL_ID`
-   - Each environment has its own `HUBSPOT_PERSONAL_ACCESS_KEY`
-
-4. Enable protection rules:
-   - Production: Require approval
-   - Staging: Auto-deploy on tag
-
----
-
-## 8. Automated Releases
-
-### Create Release Workflow
-
-Push a tag to trigger production deployment:
+**Example Release:**
 
 ```bash
-# Tag the release
-git tag -a v1.0.0 -m "Release v1.0.0"
+# Tag a new version
+git tag -a v1.0.0 -m "Release v1.0.0: Initial public release"
+
+# Push the tag (triggers release workflow)
 git push origin v1.0.0
+
+# GitHub Actions will:
+# - Build the plugin
+# - Create a ZIP file
+# - Create a GitHub release
+# - Attach the ZIP and checksum
 ```
 
-**What happens:**
+**Release Assets:**
+- `hubspot-ecommerce-1.0.0.zip` - Plugin ZIP ready for WordPress installation
+- `hubspot-ecommerce-1.0.0.zip.sha256` - Checksum for integrity verification
 
-- GitHub Actions deploys to production
-- Creates release on GitHub
-- Attaches deployment artifact (tar.gz)
-- Available for download
+## Monorepo Structure
 
----
-
-## Common Workflows
-
-### Development Cycle
-
-```bash
-# 1. Make changes
-git checkout -b feature/new-feature
-# ... make changes ...
-
-# 2. Commit
-git add .
-git commit -m "feat: add new feature"
-
-# 3. Push to branch (doesn't trigger deployment)
-git push origin feature/new-feature
-
-# 4. Create PR
-# GitHub → Pull Requests → New PR
-
-# 5. Merge to main (triggers automatic deployment to dev)
-```
-
-### Deploying Updates to All Customers
-
-```bash
-# Option 1: One by one via Actions UI
-# - Go to Actions → Deploy to Customer
-# - Run for each customer
-
-# Option 2: Batch deploy (future feature)
-# Use batch-deploy workflow with comma-separated Portal IDs
-```
-
-### Rollback
-
-If deployment causes issues:
-
-```bash
-# Check out previous commit
-git checkout v1.0.0
-
-# Manually trigger deployment via Actions UI
-# Actions → Deploy to Customer → Run workflow
-```
-
----
-
-## Troubleshooting
-
-### Deployment Fails: Authentication Error
-
-**Error in logs:**
+The project uses npm workspaces with three components:
 
 ```
-Error: Unable to authenticate with HubSpot
+hubspot-ecommerce/
+├── package.json                    # Root workspace
+├── wordpress/                      # WordPress plugin
+│   ├── package.json
+│   └── composer.json
+└── hubspot-app/                    # HubSpot OAuth companion app
+    └── package.json
 ```
 
-**Fix:**
+**npm Caching:**
 
-1. Check GitHub Secret `HUBSPOT_PERSONAL_ACCESS_KEY` is correct
-2. Verify PAK hasn't expired
-3. Ensure PAK has `developer.app.deploy` scope
-
-### Workflow Doesn't Trigger
-
-**Issue:** Push to main doesn't trigger deployment
-
-**Fix:**
-
-1. Check `.github/workflows/` directory exists
-2. Verify workflow files are valid YAML
-3. Check GitHub Actions is enabled:
-   - Settings → Actions → General
-   - Allow all actions
-
-### Customer Secret Not Found
-
-**Error:**
-
-```
-Error: Secret CUSTOMER_12345678_PAK not found
-```
-
-**Fix:**
-
-1. Go to Settings → Secrets → Actions
-2. Add secret: `CUSTOMER_12345678_PAK`
-3. Re-run workflow
-
----
-
-## Security Best Practices
-
-### ✅ DO
-
-- Use GitHub Secrets for all credentials
-- Rotate PAKs every 90 days
-- Use separate PAKs per environment
-- Enable 2FA on GitHub account
-- Limit workflow permissions to minimum needed
-
-### ❌ DON'T
-
-- Commit credentials to code
-- Share PAKs between customers
-- Use production PAK for development
-- Allow public workflows to access secrets
-
----
-
-## Monitoring & Alerts
-
-### Set Up Notifications
-
-**Slack Integration:**
+All workflows use npm caching with wildcard pattern:
 
 ```yaml
-# Add to workflow
-- name: Notify Slack
-  if: failure()
-  uses: slackapi/slack-github-action@v1
-  with:
-    webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-    payload: |
-      {
-        "text": "❌ Deployment failed for ${{ inputs.customer_name }}"
-      }
+cache: 'npm'
+cache-dependency-path: '**/package-lock.json'
 ```
 
-**Email Notifications:**
+This caches dependencies for all three workspaces, significantly speeding up workflow runs.
 
-Go to: **Settings → Notifications**
+## Dependabot Configuration
 
-- Enable: "Actions" notifications
-- Send to: your email
+**Automated dependency updates** via `.github/dependabot.yml`:
 
----
+**npm packages:**
+- Root workspace
+- WordPress workspace
+- HubSpot app workspace
 
-## Deployment Checklist
+**Composer packages:**
+- WordPress plugin (Guzzle, PHPUnit)
 
-Before deploying to customer:
+**GitHub Actions:**
+- All action versions (checkout, setup-node, etc.)
 
-- [ ] Code reviewed and approved
-- [ ] Tests passing (validation workflow)
-- [ ] Customer PAK added to GitHub Secrets
-- [ ] Customer notified of deployment window
-- [ ] Backup plan documented
-- [ ] Monitor deployment in Actions tab
-- [ ] Verify in customer's HubSpot portal
-- [ ] Test OAuth connection from WordPress
-- [ ] Send completion notification to customer
+**Schedule:** Weekly on Mondays
 
----
+**Auto-reviewers:** Assigned based on configuration
 
-## Quick Reference
+**Example Dependabot PR:**
 
-### GitHub Actions Commands
+```
+Bump actions/checkout from 4 to 5
+Bump actions/setup-node from 5 to 6
+Bump guzzlehttp/guzzle from 7.8.0 to 7.8.1
+```
+
+## Requirements
+
+**Node.js:** 20.x LTS or later
+
+**PHP:** 8.1 or later
+
+**Composer:** 2.x
+
+**GitHub Actions permissions:**
+- `contents: write` (for releases)
+- Standard permissions for other workflows
+
+## Local Testing with Act
+
+You can test workflows locally using [nektos/act](https://github.com/nektos/act):
 
 ```bash
-# View workflow runs
+# Install act
+# See: https://github.com/nektos/act#installation
+
+# Test CI workflow
+act push
+
+# Test specific job
+act -j test-wordpress
+
+# Test with specific event
+act pull_request
+```
+
+**Note:** Some features may not work in act (e.g., Node.js 24 actions). Workflows are tested and verified on GitHub Actions.
+
+## Workflow Status
+
+Check workflow status:
+
+**GitHub UI:**
+1. Go to repository **Actions** tab
+2. View recent workflow runs
+3. Click any run for detailed logs
+
+**GitHub CLI:**
+
+```bash
+# List recent runs
 gh run list
 
 # View specific run
@@ -365,44 +249,167 @@ gh run view <run-id>
 # Download artifacts
 gh run download <run-id>
 
-# Trigger workflow manually
-gh workflow run deploy-to-hubspot.yml
+# Re-run failed workflow
+gh run rerun <run-id>
 ```
 
-### npm Scripts
+**Status badges** (add to README):
+
+```markdown
+![CI](https://github.com/baursoftware/hubspot-ecommerce/actions/workflows/ci.yml/badge.svg)
+![Security](https://github.com/baursoftware/hubspot-ecommerce/actions/workflows/security-scan.yml/badge.svg)
+```
+
+## Troubleshooting
+
+### npm Cache Miss
+
+**Issue:** "Dependencies lock file is not found"
+
+**Fix:** Ensure `package-lock.json` exists in workspace directories:
 
 ```bash
-npm run deploy:dev      # Deploy to development
-npm run deploy:prod     # Deploy to production
-npm run validate        # Validate project
-npm run watch          # Watch for changes
-npm test               # Run tests
+npm install  # in root
+cd wordpress && npm install
+cd ../hubspot-app && npm install
+git add **/package-lock.json
+git commit -m "fix: add package-lock.json files"
 ```
 
-### HubSpot CLI Commands
+### Composer Not Found
+
+**Issue:** "composer: command not found"
+
+**Fix:** Workflow includes `shivammathur/setup-php@v2` with `tools: composer`. If issue persists, check PHP version compatibility.
+
+### TruffleHog: Commits Are the Same
+
+**Issue:** "BASE and HEAD commits are the same"
+
+**Fix:** Already resolved. Workflow scans entire repository instead of commit range:
+
+```yaml
+- uses: trufflesecurity/trufflehog@main
+  with:
+    path: ./
+    extra_args: --only-verified
+```
+
+### Validation Failure
+
+**Issue:** Required files missing
+
+**Fix:** Ensure these files exist in correct locations:
+- `wordpress/hubspot-ecommerce.php` - Main plugin file
+- `wordpress/composer.json` - PHP dependencies
+- `wordpress/README.md` - WordPress readme
+- `package.json` - Root workspace config
+
+### Release Build Fails
+
+**Issue:** ZIP missing files or wrong structure
+
+**Fix:**
+1. Check `exclude-from-zip.txt` patterns
+2. Verify plugin structure in workflow logs
+3. Test build locally:
 
 ```bash
-hs portals list        # List configured portals
-hs project upload      # Upload to default portal
-hs project validate    # Validate project
-hs project status      # Check deployment status
+cd wordpress
+composer install --no-dev --optimize-autoloader
+cd ..
+mkdir -p build/hubspot-ecommerce
+cp -r wordpress/* build/hubspot-ecommerce/
+cd build && zip -r ../test.zip hubspot-ecommerce/
 ```
 
----
+## Security Best Practices
+
+**Secrets management:**
+- Never commit credentials
+- Use GitHub Secrets for sensitive data
+- Rotate secrets regularly
+
+**Dependency security:**
+- Review Dependabot PRs before merging
+- Monitor security scan results
+- Update dependencies promptly
+
+**Workflow security:**
+- Limit workflow permissions
+- Use specific action versions (not `@latest`)
+- Review workflow changes in PRs
+
+**Code review:**
+- Require PR reviews before merge
+- Run CI checks on all PRs
+- Block merge on failing checks
+
+## Common Tasks
+
+### Adding a New Dependency
+
+```bash
+# Add npm dependency
+cd wordpress
+npm install --save new-package
+git add package.json package-lock.json
+git commit -m "deps: add new-package"
+
+# Add composer dependency
+cd wordpress
+composer require vendor/package
+git add composer.json composer.lock
+git commit -m "deps: add vendor/package"
+
+# Dependabot will monitor these automatically
+```
+
+### Creating a Release
+
+```bash
+# Update version and changelog
+# Then tag:
+git tag -a v1.2.0 -m "Release v1.2.0"
+git push origin v1.2.0
+
+# Monitor release: Actions tab
+# Download from: Releases page
+```
+
+### Updating GitHub Actions
+
+Dependabot automatically creates PRs for action updates. Manually update:
+
+```yaml
+# Before
+uses: actions/checkout@v4
+
+# After
+uses: actions/checkout@v5
+```
+
+Commit, push, and verify workflows still pass.
 
 ## Next Steps
 
-1. ✅ Set up GitHub repository
-2. ✅ Add development secrets
-3. ✅ Test deployment to development
-4. ⏳ Add first customer secret
-5. ⏳ Deploy to first customer
-6. ⏳ Document customer-specific configurations
-7. ⏳ Set up monitoring and alerts
-8. ⏳ Create runbook for common issues
+1. Review workflow configurations in `.github/workflows/`
+2. Enable branch protection rules for `main`
+3. Configure required status checks
+4. Set up GitHub Environments (staging/production)
+5. Add workflow status badges to README
+6. Configure notification preferences
+7. Review and merge Dependabot PRs
 
----
+## References
 
-**Last Updated:** 2025-01-24
-**Node Version:** 20.x LTS
-**GitHub Actions:** Enabled and tested
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
+- [Dependabot Configuration](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file)
+- [nektos/act (Local Testing)](https://github.com/nektos/act)
+
+**Last Updated:** 2025-01-26
+
+**GitHub Actions Version:** v5 (checkout), v6 (setup-node)
+
+**Workflows:** CI, Security Scan, Release

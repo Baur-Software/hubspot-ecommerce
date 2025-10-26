@@ -112,17 +112,26 @@ composer install
 wp plugin activate hubspot-ecommerce
 ```
 
-### 3. Sync Mock Products
+### 3. Create Mock Products
+
+**Option A: Via WordPress Admin** (Recommended)
+
+1. Go to: **Products → Add New**
+2. Create products using the product editor
+3. Products are created locally first (no HubSpot sync required)
+
+**Option B: Pull from Mock HubSpot**
+
+- Go to: **HubSpot Shop → Product Sync**
+- Click: **"Pull Products from HubSpot"**
+- Mock HubSpot API returns 3 sample products
+
+**Option C: Via WP-CLI**
 
 ```bash
 # Trigger product sync (will use mock data)
 wp cron event run hubspot_ecommerce_sync_products
 ```
-
-**Or via WordPress Admin**:
-
-- Go to: **HubSpot Shop → Sync Products**
-- Click: **"Sync Products Now"**
 
 ### 4. Create Pages
 
@@ -215,14 +224,19 @@ npm test
 
 Log into WordPress admin - should see yellow demo banner.
 
-### Check 2: Product Sync
+### Check 2: Product Creation
+
+**Create a test product via admin or pull from mock HubSpot**:
 
 ```bash
+# Option 1: Pull from mock HubSpot
 wp cron event run hubspot_ecommerce_sync_products
+
+# Check products
 wp post list --post_type=hs_product
 ```
 
-Should show 3 mock products.
+Should show mock products (either created locally or pulled from mock HubSpot).
 
 ### Check 3: Network Tab
 
@@ -244,8 +258,9 @@ Complete checkout - order should be created with:
 
 ### What Works
 
-✅ Product sync (3 mock products)
-✅ Product display
+✅ Local product creation (WordPress as source of truth)
+✅ Manual sync to/from mock HubSpot (push/pull buttons)
+✅ Product display with templates
 ✅ Add to cart
 ✅ Checkout flow
 ✅ Contact creation (mock)
@@ -260,7 +275,23 @@ Complete checkout - order should be created with:
 ❌ Actual payment processing
 ❌ Real invoice payment
 ❌ Webhook verification (needs real signatures)
-❌ Sync from actual HubSpot data
+❌ Pro features (auto-sync, subscriptions, etc.)
+
+### Free Tier Features in Demo
+
+All Free tier features work in demo mode:
+
+- Create products locally with templates (default, minimal, detailed, landing)
+- Manual push to mock HubSpot
+- Manual pull from mock HubSpot
+- Shopping cart and checkout
+- Basic order management
+
+Pro features require a license even in demo mode, but you can test them by setting:
+
+```php
+define('HUBSPOT_LICENSE_TIER', 'pro');
+```
 
 ---
 
@@ -281,11 +312,22 @@ wp option update hubspot_ecommerce_demo_mode 1
 
 ### No Mock Products After Sync
 
+**Note:** In the current version, products are created locally first. You don't need to sync to see products.
+
+**To create products:**
+
+1. Go to **Products → Add New** in WordPress admin
+2. Or pull from mock HubSpot: **HubSpot Shop → Product Sync → Pull Products from HubSpot**
+
+**To reset products:**
+
 ```bash
 # Delete existing products
 wp post delete $(wp post list --post_type=hs_product --format=ids) --force
 
-# Re-sync
+# Pull mock products from HubSpot
+# Go to: HubSpot Shop → Product Sync → Click "Pull Products from HubSpot"
+# Or via WP-CLI:
 wp cron event run hubspot_ecommerce_sync_products
 
 # Check
@@ -383,7 +425,9 @@ Format: `https://invoice.hubspot.com/payment/mock-{uniqid()}`
 # Enable demo mode
 wp option update hubspot_ecommerce_demo_mode 1
 
-# Sync mock products
+# Create products (choose one):
+# Option 1: Create via WordPress admin (Products → Add New)
+# Option 2: Pull from mock HubSpot
 wp cron event run hubspot_ecommerce_sync_products
 
 # Run tests
@@ -394,3 +438,9 @@ npm test
 **Visit**: <https://granttk8org.local/shop>
 
 **Demo away!** 🎭
+
+## 📚 Related Documentation
+
+- [Local-First Workflow](LOCAL_FIRST_WORKFLOW.md) - Understanding the product creation workflow
+- [Product Templates](PRODUCT_TEMPLATES.md) - Using product templates (default, minimal, detailed, landing)
+- [Pro Features](PRO_FEATURES.md) - License tiers and Pro feature gating

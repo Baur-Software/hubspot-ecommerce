@@ -6,10 +6,23 @@ A full-featured ecommerce plugin that uses HubSpot as the backend for products, 
 
 ### 🛍️ Product Management
 
-- Automatic sync of products from HubSpot
+**Local-First Workflow** (Free Tier)
+
+- Create products in WordPress first (WordPress as source of truth)
+- Choose from 4 product templates: Default, Minimal, Detailed, Landing
+- Manual push TO HubSpot (on-demand via product editor)
+- Manual pull FROM HubSpot (on-demand sync)
 - Product images, pricing, SKUs, and descriptions
 - Product categories and tags
-- Configurable sync intervals (hourly, twice daily, daily)
+
+**Auto-Sync** (Pro Feature)
+
+- Automatic scheduled sync FROM HubSpot (hourly, twice daily, daily)
+- Auto-push TO HubSpot on product save
+- Configurable sync intervals
+
+**[Local-First Workflow Guide →](../docs/LOCAL_FIRST_WORKFLOW.md)**
+**[Product Templates Guide →](../docs/PRODUCT_TEMPLATES.md)**
 
 ### 🛒 Shopping Cart
 
@@ -32,7 +45,7 @@ A full-featured ecommerce plugin that uses HubSpot as the backend for products, 
 - Customer order history
 - Account dashboard
 
-### 🔄 Subscription Management
+### 🔄 Subscription Management (Pro Feature)
 
 - **Commerce Subscriptions**: Automatic detection of recurring/subscription products from HubSpot
 - **Email Subscription Types**: Full integration with HubSpot marketing subscription preferences
@@ -41,6 +54,26 @@ A full-featured ecommerce plugin that uses HubSpot as the backend for products, 
 - Real-time subscription status updates
 - GDPR-compliant with legal basis support
 - **[Full Subscription Documentation →](SUBSCRIPTIONS.md)**
+
+### 💼 Pro Features
+
+**Pro Tier** ($99/year)
+
+- Automatic product sync FROM HubSpot (scheduled)
+- Auto-push TO HubSpot on save
+- Private App authentication
+- Subscriptions (recurring billing)
+- HubSpot Payments (invoices)
+- Email preference management
+
+**Enterprise Tier** ($299/year)
+
+- Everything in Pro
+- Multi-store support
+- Priority support
+- Custom features
+
+**[Pro Features Documentation →](../docs/PRO_FEATURES.md)**
 
 ### 🎨 Theme Integration
 
@@ -130,24 +163,34 @@ Demo mode provides:
 
 ## Usage
 
-### Syncing Products
+### Creating and Syncing Products
 
-**Automatic Sync**
+**Local-First Workflow** (Free Tier)
+
+Products are created in WordPress first, then optionally synced to HubSpot:
+
+1. **Create Product**
+   - Go to Products → Add New
+   - Fill in title, description, price, SKU
+   - Choose a product template (default, minimal, detailed, landing)
+   - Publish
+
+2. **Manual Push to HubSpot**
+   - In product editor, find "HubSpot Sync" meta box
+   - Click "Push to HubSpot" button
+   - Product is created/updated in HubSpot
+
+3. **Manual Pull from HubSpot**
+   - Go to HubSpot Shop → Product Sync
+   - Click "Pull Products from HubSpot"
+   - Or use pull button in product editor
+
+**Auto-Sync** (Pro Feature)
 
 - Products sync automatically based on the interval you set in Settings
-- Default: Hourly
-
-**Manual Sync**
-
-- Go to HubSpot Shop → Sync Products
-- Click "Sync Products Now"
-- Wait for the sync to complete
-
-**Single Product Sync**
-
-- Go to Products in WordPress admin
-- Hover over a product
-- Click "Sync from HubSpot"
+- Auto-push on save: Products automatically sync TO HubSpot when saved
+- Auto-pull scheduled: Products automatically sync FROM HubSpot on schedule
+- Default interval: Hourly
 
 ### Product Display
 
@@ -161,6 +204,33 @@ Demo mode provides:
 - Click any product to view details
 - Shows images, description, price, SKU
 - Add to cart functionality
+- **Multiple templates available**:
+  - **Default**: Full-featured product page
+  - **Minimal**: Clean, simple layout
+  - **Detailed**: Extended product information
+  - **Landing**: Landing page optimized layout
+
+#### Template Selection
+
+Choose template in product editor:
+
+1. Edit any product
+2. Find "Product Template" meta box
+3. Select desired template
+4. Update product
+
+#### Template Override
+
+Copy templates to your theme:
+
+```
+your-theme/
+└── hubspot-ecommerce/
+    ├── single-product.php          # Default template
+    ├── single-product-minimal.php  # Minimal template
+    ├── single-product-detailed.php # Detailed template
+    └── single-product-landing.php  # Landing template
+```
 
 **Using Shortcodes**
 
@@ -253,8 +323,8 @@ add_filter('hubspot_ecommerce_product_properties', function($properties) {
 ## Requirements
 
 - WordPress 6.4+
-- PHP 8.0+
-- HubSpot account with API access
+- PHP 8.1+
+- HubSpot account with API access (or use Demo Mode)
 - Composer (for installation)
 
 ## HubSpot Setup
@@ -360,6 +430,7 @@ hubspot-ecommerce/
 ├── includes/
 │   ├── class-hubspot-api.php       # HubSpot API wrapper
 │   ├── class-mock-hubspot-api.php  # Mock API for testing
+│   ├── class-license-manager.php   # Pro feature gating
 │   ├── class-product-manager.php
 │   ├── class-cart.php
 │   ├── class-checkout.php
@@ -369,11 +440,15 @@ hubspot-ecommerce/
 │   │   └── class-payment-webhook.php
 │   ├── admin/
 │   │   ├── class-admin.php
-│   │   └── class-settings.php
+│   │   ├── class-settings.php
+│   │   └── class-product-meta-boxes.php  # Product editor enhancements
 │   └── frontend/
 │       ├── class-frontend.php
-│       └── class-template-loader.php
+│       └── class-template-loader.php  # Multi-template support
 ├── templates/                      # Template files
+│   ├── single-product.php         # Default template
+│   ├── single-product-minimal.php # Minimal template
+│   └── ...                        # Other templates
 ├── assets/                         # CSS and JS
 ├── tests/                          # Playwright E2E tests
 ├── composer.json
@@ -417,9 +492,12 @@ This plugin implements multiple layers of security:
 
 ## Implemented Features
 
-- ✅ **Payment Integration**: HubSpot Commerce Hub invoices with payment links
-- ✅ **Subscription Product Support**: Automatic detection from HubSpot
-- ✅ **Email Subscription Management**: Full marketing preferences integration
+- ✅ **Local-First Product Workflow**: WordPress as source of truth with manual sync
+- ✅ **Product Templates**: 4 templates (default, minimal, detailed, landing)
+- ✅ **License Manager**: Pro feature gating with Free/Pro/Enterprise tiers
+- ✅ **Payment Integration**: HubSpot Commerce Hub invoices with payment links (Pro)
+- ✅ **Subscription Product Support**: Automatic detection from HubSpot (Pro)
+- ✅ **Email Subscription Management**: Full marketing preferences integration (Pro)
 - ✅ **Webhook Handling**: Payment status updates from HubSpot
 - ✅ **Demo Mode**: Mock backend for testing without API credentials
 - ✅ **Automated Testing**: 46 Playwright tests covering security and functionality
