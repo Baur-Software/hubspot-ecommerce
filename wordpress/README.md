@@ -123,6 +123,7 @@ Demo mode provides:
 ### Syncing Products
 
 **Automatic Sync**
+
 - Products sync automatically based on the interval you set in Settings
 - Default: Hourly
 
