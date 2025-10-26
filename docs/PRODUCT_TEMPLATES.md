@@ -5,9 +5,11 @@ Product templates allow you to control how individual product pages are displaye
 ## Available Templates
 
 ### Default Template
+
 Standard product layout with all features.
 
 Features:
+
 - Product image gallery
 - Price display with currency formatting
 - SKU and product metadata
@@ -19,9 +21,11 @@ Features:
 File: `wordpress/templates/single-product.php`
 
 ### Minimal Template
+
 Clean, simple layout with essential information only.
 
 Features:
+
 - Single product image
 - Title and price
 - Basic description
@@ -31,9 +35,11 @@ Features:
 File: `wordpress/templates/single-product-minimal.php`
 
 ### Detailed Template (Coming Soon)
+
 Extended layout with tabbed sections.
 
 Planned Features:
+
 - Product description tab
 - Specifications tab
 - Reviews tab
@@ -42,9 +48,11 @@ Planned Features:
 File: `wordpress/templates/single-product-detailed.php`
 
 ### Landing Page Template (Coming Soon)
+
 Full-width marketing-focused layout.
 
 Planned Features:
+
 - Hero section
 - Feature highlights
 - Testimonials section

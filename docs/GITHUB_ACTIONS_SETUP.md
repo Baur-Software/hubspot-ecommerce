@@ -11,6 +11,7 @@ This project uses GitHub Actions for continuous integration (CI), security scann
 ### 1. CI Workflow (ci.yml)
 
 **Triggers:**
+
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop` branches
 
@@ -60,6 +61,7 @@ git push origin feature/my-feature
 ### 2. Security Scan Workflow (security-scan.yml)
 
 **Triggers:**
+
 - Push to `main` branch
 - Pull requests to `main` branch
 - Weekly schedule (Mondays at 9 AM UTC)
@@ -91,6 +93,7 @@ git push origin main
 ### 3. Release Workflow (release.yml)
 
 **Triggers:**
+
 - Version tags matching `v*.*.*` (e.g., `v1.0.0`, `v1.2.3`)
 
 **Process:**
@@ -141,6 +144,7 @@ git push origin v1.0.0
 ```
 
 **Release Assets:**
+
 - `hubspot-ecommerce-1.0.0.zip` - Plugin ZIP ready for WordPress installation
 - `hubspot-ecommerce-1.0.0.zip.sha256` - Checksum for integrity verification
 
@@ -148,7 +152,7 @@ git push origin v1.0.0
 
 The project uses npm workspaces with three components:
 
-```
+```text
 hubspot-ecommerce/
 ├── package.json                    # Root workspace
 ├── wordpress/                      # WordPress plugin
@@ -174,14 +178,17 @@ This caches dependencies for all three workspaces, significantly speeding up wor
 **Automated dependency updates** via `.github/dependabot.yml`:
 
 **npm packages:**
+
 - Root workspace
 - WordPress workspace
 - HubSpot app workspace
 
 **Composer packages:**
+
 - WordPress plugin (Guzzle, PHPUnit)
 
 **GitHub Actions:**
+
 - All action versions (checkout, setup-node, etc.)
 
 **Schedule:** Weekly on Mondays
@@ -190,7 +197,7 @@ This caches dependencies for all three workspaces, significantly speeding up wor
 
 **Example Dependabot PR:**
 
-```
+```text
 Bump actions/checkout from 4 to 5
 Bump actions/setup-node from 5 to 6
 Bump guzzlehttp/guzzle from 7.8.0 to 7.8.1
@@ -205,6 +212,7 @@ Bump guzzlehttp/guzzle from 7.8.0 to 7.8.1
 **Composer:** 2.x
 
 **GitHub Actions permissions:**
+
 - `contents: write` (for releases)
 - Standard permissions for other workflows
 
@@ -233,6 +241,7 @@ act pull_request
 Check workflow status:
 
 **GitHub UI:**
+
 1. Go to repository **Actions** tab
 2. View recent workflow runs
 3. Click any run for detailed logs
@@ -256,8 +265,10 @@ gh run rerun <run-id>
 **Status badges** (add to README):
 
 ```markdown
-![CI](https://github.com/baursoftware/hubspot-ecommerce/actions/workflows/ci.yml/badge.svg)
-![Security](https://github.com/baursoftware/hubspot-ecommerce/actions/workflows/security-scan.yml/badge.svg)
+![CI](https://github.com/baursoftware/hubspot-ecommerce/\
+actions/workflows/ci.yml/badge.svg)
+![Security](https://github.com/baursoftware/hubspot-ecommerce/\
+actions/workflows/security-scan.yml/badge.svg)
 ```
 
 ## Troubleshooting
@@ -280,13 +291,15 @@ git commit -m "fix: add package-lock.json files"
 
 **Issue:** "composer: command not found"
 
-**Fix:** Workflow includes `shivammathur/setup-php@v2` with `tools: composer`. If issue persists, check PHP version compatibility.
+**Fix:** Workflow includes `shivammathur/setup-php@v2` with
+`tools: composer`. If issue persists, check PHP version compatibility.
 
 ### TruffleHog: Commits Are the Same
 
 **Issue:** "BASE and HEAD commits are the same"
 
-**Fix:** Already resolved. Workflow scans entire repository instead of commit range:
+**Fix:** Already resolved. Workflow scans entire repository instead of
+commit range:
 
 ```yaml
 - uses: trufflesecurity/trufflehog@main
@@ -300,6 +313,7 @@ git commit -m "fix: add package-lock.json files"
 **Issue:** Required files missing
 
 **Fix:** Ensure these files exist in correct locations:
+
 - `wordpress/hubspot-ecommerce.php` - Main plugin file
 - `wordpress/composer.json` - PHP dependencies
 - `wordpress/README.md` - WordPress readme
@@ -310,6 +324,7 @@ git commit -m "fix: add package-lock.json files"
 **Issue:** ZIP missing files or wrong structure
 
 **Fix:**
+
 1. Check `exclude-from-zip.txt` patterns
 2. Verify plugin structure in workflow logs
 3. Test build locally:
@@ -326,21 +341,25 @@ cd build && zip -r ../test.zip hubspot-ecommerce/
 ## Security Best Practices
 
 **Secrets management:**
+
 - Never commit credentials
 - Use GitHub Secrets for sensitive data
 - Rotate secrets regularly
 
 **Dependency security:**
+
 - Review Dependabot PRs before merging
 - Monitor security scan results
 - Update dependencies promptly
 
 **Workflow security:**
+
 - Limit workflow permissions
 - Use specific action versions (not `@latest`)
 - Review workflow changes in PRs
 
 **Code review:**
+
 - Require PR reviews before merge
 - Run CI checks on all PRs
 - Block merge on failing checks

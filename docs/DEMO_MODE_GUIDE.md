@@ -114,19 +114,19 @@ wp plugin activate hubspot-ecommerce
 
 ### 3. Create Mock Products
 
-**Option A: Via WordPress Admin** (Recommended)
+#### Option A: Via WordPress Admin (Recommended)
 
 1. Go to: **Products → Add New**
 2. Create products using the product editor
 3. Products are created locally first (no HubSpot sync required)
 
-**Option B: Pull from Mock HubSpot**
+#### Option B: Pull from Mock HubSpot
 
 - Go to: **HubSpot Shop → Product Sync**
 - Click: **"Pull Products from HubSpot"**
 - Mock HubSpot API returns 3 sample products
 
-**Option C: Via WP-CLI**
+#### Option C: Via WP-CLI
 
 ```bash
 # Trigger product sync (will use mock data)

@@ -7,6 +7,7 @@ The plugin uses a local-first approach to product management, giving you full co
 **WordPress is the source of truth** for your product content and presentation. Products are created and edited in WordPress, then optionally synced to HubSpot for CRM, invoicing, and payment processing.
 
 This approach provides:
+
 - Full control over product pages and design
 - Ability to work offline or without HubSpot connection
 - Manual control over sync timing
@@ -44,11 +45,13 @@ This approach provides:
 Pro users can enable automatic syncing in Settings:
 
 **Auto-Push TO HubSpot:**
+
 - Products automatically sync to HubSpot on save
 - Enabled in Settings → Product Sync Settings
 - Requires Pro license
 
 **Auto-Sync FROM HubSpot:**
+
 - Products created in HubSpot automatically appear in WordPress
 - Runs on configurable schedule (hourly, twice daily, daily)
 - Enabled in Settings → Product Sync Settings
@@ -61,15 +64,18 @@ Pro users can enable automatic syncing in Settings:
 Each product has a "HubSpot Sync" meta box showing:
 
 **Sync Status Badges:**
+
 - 🔵 **Local Product** - Exists only in WordPress
 - 🟢 **Synced to HubSpot** - Connected to HubSpot product
 
 **Action Buttons:**
+
 - **Push to HubSpot** - Send current product data to HubSpot
 - **Pull from HubSpot** - Update from HubSpot data
 - **Enable sync to HubSpot** - Checkbox to include in auto-sync (Pro)
 
 **Information Displayed:**
+
 - HubSpot Product ID (if synced)
 - Last sync timestamp
 - Sync status
@@ -79,10 +85,12 @@ Each product has a "HubSpot Sync" meta box showing:
 **Product Sync Settings** (Settings → HubSpot Shop)
 
 Free Tier:
+
 - Manual sync controls only
 - Pro feature indicators shown
 
 Pro Tier:
+
 - ✅ Auto-Sync FROM HubSpot (checkbox)
   - Sync Interval (hourly/twice daily/daily)
 - ✅ Auto-Push TO HubSpot (checkbox)
@@ -90,6 +98,7 @@ Pro Tier:
 ## Welcome Notice
 
 First-time product creators see a helpful notice explaining:
+
 - Products are like WordPress posts (full design flexibility)
 - Choose product templates in sidebar
 - Products stay local by default
@@ -100,9 +109,11 @@ The notice can be dismissed and won't show again.
 ## Use Cases
 
 ### Scenario 1: Import from HubSpot
+
 You have existing products in HubSpot CRM.
 
 **Free Tier:**
+
 1. Go to HubSpot Shop → Product Sync
 2. Click "Pull Products from HubSpot"
 3. Products are imported to WordPress
@@ -110,14 +121,17 @@ You have existing products in HubSpot CRM.
 5. Products remain synced
 
 **Pro Tier:**
+
 1. Enable "Auto-Sync FROM HubSpot" in settings
 2. Products automatically sync on schedule
 3. New HubSpot products appear automatically
 
 ### Scenario 2: Create in WordPress
+
 You want to design product pages in WordPress first.
 
 **Free Tier:**
+
 1. Create products in WordPress
 2. Design pages with templates
 3. Preview and perfect the presentation
@@ -125,12 +139,14 @@ You want to design product pages in WordPress first.
 5. Products appear in HubSpot CRM
 
 **Pro Tier:**
+
 1. Enable "Auto-Push TO HubSpot" in settings
 2. Create products in WordPress
 3. Products automatically sync on save
 4. Immediately available in HubSpot
 
 ### Scenario 3: Hybrid Workflow
+
 Some products managed locally, others synced.
 
 1. Create local products for drafts/previews
@@ -143,6 +159,7 @@ Some products managed locally, others synced.
 ### Sync Status Storage
 
 Product sync data stored as post meta:
+
 - `_hubspot_product_id` - HubSpot CRM product ID
 - `_hubspot_sync_enabled` - Whether sync is enabled (1/0)
 - `_last_synced_from_hubspot` - Timestamp of last sync
@@ -151,11 +168,13 @@ Product sync data stored as post meta:
 ### Automatic Sync (Pro)
 
 Scheduled via WordPress cron:
+
 - Action: `hubspot_ecommerce_sync_products`
 - Frequency: Set in settings (hourly/twice daily/daily)
 - Only runs if Pro license active AND setting enabled
 
 Auto-push on save:
+
 - Hook: `save_post_hs_product`
 - Checks Pro license and setting
 - Pushes to HubSpot if enabled
@@ -163,6 +182,7 @@ Auto-push on save:
 ### License Gating
 
 Auto-sync features check:
+
 ```php
 $license_manager = HubSpot_Ecommerce_License_Manager::instance();
 if ($license_manager->can_use_auto_sync()) {
@@ -171,13 +191,16 @@ if ($license_manager->can_use_auto_sync()) {
 ```
 
 Implementation:
+
 - Free: Manual buttons only
 - Pro/Enterprise: All features available
 
 ## Admin UI Components
 
 ### Meta Boxes
+
 `HubSpot_Ecommerce_Product_Meta_Boxes` class handles:
+
 - Template selection
 - Sync status display
 - Manual sync buttons
@@ -185,14 +208,18 @@ Implementation:
 - Pro upgrade prompts
 
 ### Settings Page
+
 `HubSpot_Ecommerce_Settings` class handles:
+
 - Auto-sync toggle controls
 - Sync interval selection
 - Pro feature gating
 - Upgrade notices
 
 ### Product Manager
+
 `HubSpot_Ecommerce_Product_Manager` class handles:
+
 - Sync logic (push/pull)
 - Cron scheduling
 - HubSpot API communication
@@ -209,16 +236,19 @@ Implementation:
 ## Troubleshooting
 
 **Product won't sync:**
+
 - Check HubSpot connection (Settings → Connect to HubSpot)
 - Verify sync checkbox is enabled
 - Check for error messages in sync status
 
 **Synced product not updating:**
+
 - Click "Pull from HubSpot" to refresh
 - Or "Push to HubSpot" to send local changes
 - Check last sync timestamp
 
 **Auto-sync not working:**
+
 - Verify Pro license is active (Settings → License)
 - Check auto-sync setting is enabled
 - Confirm WordPress cron is running

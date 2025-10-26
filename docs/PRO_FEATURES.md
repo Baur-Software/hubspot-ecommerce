@@ -5,71 +5,85 @@ The HubSpot Ecommerce plugin offers three license tiers with progressively advan
 ## License Tiers
 
 ### Free Tier
+
 Core ecommerce functionality at no cost.
 
 **Product Management:**
+
 - Unlimited products
 - Manual sync to/from HubSpot
 - Product templates
 - Local-first workflow
 
 **Cart & Checkout:**
+
 - Shopping cart
 - Basic checkout
 - Order management
 
 **HubSpot Integration:**
+
 - OAuth authentication
 - Manual product sync
 - Customer sync
 - Order sync
 
 ### Pro Tier
+
 Advanced automation and business features.
 
 **Everything in Free, plus:**
 
 **Automatic Product Sync:**
+
 - Auto-sync FROM HubSpot (scheduled)
 - Auto-push TO HubSpot (on save)
 - Configurable sync intervals
 
 **Private App Authentication:**
+
 - Use HubSpot Private App tokens
 - Required for advanced API scopes
 - More reliable than OAuth
 
 **Subscriptions:**
+
 - Recurring billing products
 - Subscription management
 - Billing period configuration
 
 **HubSpot Payments:**
+
 - Invoice creation
 - Payment processing
 - Receipt management
 
 **Email Preferences:**
+
 - Customer email preferences
 - Subscription management
 - GDPR compliance
 
 ### Enterprise Tier
+
 Multi-store and advanced features.
 
 **Everything in Pro, plus:**
 
 **Multi-Store Support:**
+
 - Multiple WordPress sites
 - Single HubSpot account
 - Centralized management
 
 **Priority Support:**
+
 - Direct support access
 - Faster response times
 - Implementation assistance
 
 **Custom Features:**
+
 - Custom integrations
 - Webhook handlers
 - Advanced reporting
@@ -137,6 +151,7 @@ if (!$is_pro) {
 ```
 
 Free users see:
+
 - Disabled checkboxes for Pro features
 - Pro badges on settings
 - Upgrade links to purchase page
@@ -164,7 +179,7 @@ Product editor shows Pro features with upgrade prompts:
 ### Setup Process
 
 1. **Purchase License**
-   - Visit https://baursoftware.com/products/hubspot-ecommerce
+   - Visit <https://baursoftware.com/products/hubspot-ecommerce>
    - Select Pro or Enterprise tier
    - Complete purchase
 
@@ -189,10 +204,12 @@ License validation uses **License Manager for WooCommerce** on baursoftware.com:
 **API Endpoint:** `https://baursoftware.com/wp-json/lmfwc/v2/licenses`
 
 **Authentication:**
+
 - Consumer Key: Set via `HUBSPOT_LICENSE_CONSUMER_KEY` constant
 - Consumer Secret: Set via `HUBSPOT_LICENSE_CONSUMER_SECRET` constant
 
 **Validation Process:**
+
 1. Plugin sends license key to server
 2. Server checks key validity
 3. Server returns tier and status
@@ -200,6 +217,7 @@ License validation uses **License Manager for WooCommerce** on baursoftware.com:
 5. Daily revalidation
 
 **Cached Data:**
+
 - License key (hashed)
 - License tier (free/pro/enterprise)
 - License status (active/inactive/expired)
@@ -208,21 +226,25 @@ License validation uses **License Manager for WooCommerce** on baursoftware.com:
 ### License Management
 
 **Deactivation:**
+
 - Go to HubSpot Shop → License
 - Click "Deactivate License"
 - Frees activation for use on another site
 
 **Transfer:**
+
 - Deactivate on old site
 - Activate on new site
 - Each license allows 1 active site
 
 **Renewal:**
+
 - Licenses are typically annual
 - Renewal notice shown before expiration
 - Grace period after expiration
 
 **Refunds:**
+
 - 30-day money-back guarantee
 - Contact support for refund requests
 
@@ -255,6 +277,7 @@ Pro features show badges throughout admin:
 ```
 
 Styling:
+
 - Blue background (#2271b1)
 - White text
 - Small font size
@@ -263,11 +286,13 @@ Styling:
 ### Upgrade Notices
 
 Contextual upgrade prompts appear:
+
 - Settings page (top of Pro features section)
 - Product editor (sync meta box)
 - Sync page (for automatic sync)
 
 **Free Tier Notice Example:**
+
 ```
 Automatic Product Sync is a Pro Feature
 
@@ -280,6 +305,7 @@ Pro tier: Automatic scheduled sync from HubSpot + auto-push on save.
 ### Disabled Controls
 
 Free users see Pro features with:
+
 - Grayed out/disabled checkboxes
 - Pro badge next to label
 - Explanation below control
@@ -312,6 +338,7 @@ define('HUBSPOT_DEMO_MODE', true);
 ```
 
 With demo mode:
+
 - All Pro features enabled
 - Mock HubSpot API (no real connection needed)
 - Sample products and data
@@ -331,23 +358,26 @@ This bypasses license server validation.
 ## Support
 
 ### Free Tier
+
 - Community support (GitHub issues)
 - Documentation
 - Knowledge base
 
 ### Pro Tier
+
 - Email support
 - Response within 2 business days
 - Access to all docs
 
 ### Enterprise Tier
+
 - Priority email support
 - Response within 1 business day
 - Implementation consultation
 - Custom feature requests
 
-**Support Portal:** https://baursoftware.com/support
-**GitHub Issues:** https://github.com/baursoftware/hubspot-ecommerce/issues
+**Support Portal:** <https://baursoftware.com/support>
+**GitHub Issues:** <https://github.com/baursoftware/hubspot-ecommerce/issues>
 
 ## Pricing
 
@@ -356,17 +386,19 @@ This bypasses license server validation.
 
 Volume discounts available for 5+ sites.
 
-**Purchase:** https://baursoftware.com/products/hubspot-ecommerce
+**Purchase:** <https://baursoftware.com/products/hubspot-ecommerce>
 
 ## Future Features (Roadmap)
 
 **Planned Pro Features:**
+
 - Abandoned cart recovery
 - Advanced reporting
 - Customer segmentation
 - Product recommendations
 
 **Planned Enterprise Features:**
+
 - Multi-currency support
 - Advanced webhooks
 - Custom workflows
