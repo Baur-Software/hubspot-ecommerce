@@ -1,14 +1,14 @@
 {
-    "name": "yourusername/hubspot-ecommerce",
+    "name": "baursoftware/hubspot-ecommerce",
     "description": "HubSpot-powered ecommerce for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "require": {
-        "php": ">=8.0",
-        "guzzlehttp/guzzle": "^7.8"
+        "php": ">=8.1",
+        "guzzlehttp/guzzle": ">=7.8"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": ">=10"
     },
     "autoload": {
         "psr-4": {
