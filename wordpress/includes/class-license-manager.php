@@ -418,7 +418,7 @@ class HubSpot_Ecommerce_License_Manager {
             "https://baursoftware.com/wp-json/wc/v3/orders/{$order_id}",
             [
                 'headers' => [
-                    'Authorization' => 'Basic ' . base64_encode(self::CONSUMER_KEY . ':' . self::CONSUMER_SECRET),
+                    'Authorization' => 'Basic ' . base64_encode($this->get_consumer_key() . ':' . $this->get_consumer_secret()),
                 ],
                 'timeout' => 15,
             ]
