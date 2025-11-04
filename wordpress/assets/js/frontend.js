@@ -12,6 +12,7 @@
             this.removeFromCart();
             this.processCheckout();
             this.updateCartCount();
+            this.handleDataDeletion();
         },
 
         /**
@@ -261,6 +262,52 @@
             var symbol = symbols[currency] || currency + ' ';
 
             return symbol + parseFloat(amount).toFixed(2);
+        },
+
+        /**
+         * Handle data deletion request
+         */
+        handleDataDeletion: function() {
+            $('#request-data-deletion').on('click', function(e) {
+                e.preventDefault();
+
+                var confirmMessage = 'Are you sure you want to request deletion of all your personal data?\n\n' +
+                                   'This action includes:\n' +
+                                   '- Your account information\n' +
+                                   '- Shopping cart data\n' +
+                                   '- Email preferences\n\n' +
+                                   'Note: Order records required by law will be retained with anonymized customer information.\n\n' +
+                                   'You will receive a confirmation email to complete this request.';
+
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                var $button = $(this);
+                $button.prop('disabled', true).text('Processing...');
+
+                $.ajax({
+                    url: hubspotEcommerce.rest_url + 'hubspot-ecommerce/v1/gdpr/delete-request',
+                    type: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', hubspotEcommerce.rest_nonce);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Deletion request sent!\n\nPlease check your email and follow the confirmation link to complete the deletion process.');
+                            $button.text('Request Sent');
+                        } else {
+                            alert('Failed to send deletion request. Please try again or contact support.');
+                            $button.prop('disabled', false).text('Request Data Deletion');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Deletion request error:', xhr);
+                        alert('Failed to send deletion request. Please try again or contact support.');
+                        $button.prop('disabled', false).text('Request Data Deletion');
+                    }
+                });
+            });
         }
     };
 

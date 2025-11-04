@@ -60,7 +60,9 @@ class HubSpot_Ecommerce_Frontend {
 
         wp_localize_script('hubspot-ecommerce', 'hubspotEcommerce', [
             'ajax_url' => admin_url('admin-ajax.php'),
+            'rest_url' => rest_url(),
             'nonce' => wp_create_nonce('hubspot_ecommerce_nonce'),
+            'rest_nonce' => wp_create_nonce('wp_rest'),
             'cart_count' => $cart->get_cart_item_count(),
             'cart_total' => $cart->get_cart_total(),
             'currency' => get_option('hubspot_ecommerce_currency', 'USD'),
