@@ -486,5 +486,147 @@
 
 ---
 
-**Last Updated:** 2025-01-24
+## SOC2 Type II Compliance Requirements
+
+### Overview
+
+For enterprise customers and HubSpot Marketplace certification, SOC2 Type II compliance demonstrates operational effectiveness of security controls.
+
+**Status:** ⏳ In Progress (12-month observation period)
+**Documentation:** `docs/SOC2_TYPE_II_AUDIT.md`
+
+### Required for Enterprise Sales
+
+**Benefits:**
+- Reduces customer security questionnaires
+- Enables enterprise contract procurement
+- Competitive advantage in regulated industries
+- Required for some Fortune 500 customers
+- Supports higher pricing (Enterprise tier)
+
+### Compliance Timeline
+
+**Phase 1: Type I (Design)** - ✅ Assumed Complete
+- Control design documentation
+- Policy and procedure documentation
+- Security architecture review
+
+**Phase 2: Type II (Operations)** - ⏳ Ongoing (2025)
+- 6-12 month observation period
+- Quarterly access reviews
+- Continuous evidence collection
+- External audit (Q4 2025)
+
+### Quick Wins for Compliance
+
+**Already Implemented:**
+- ✅ Automated security scanning (GitHub Actions)
+- ✅ Dependency vulnerability monitoring (Dependabot)
+- ✅ Secret scanning (TruffleHog)
+- ✅ Code review requirements
+- ✅ Secure credential management
+- ✅ Security test suite (13 tests)
+- ✅ Change management (Git workflow)
+
+**Needed Before Enterprise Launch:**
+- [ ] Quarterly access reviews (start Q1 2025)
+- [ ] Incident response policy
+- [ ] Formal vulnerability disclosure process
+- [ ] Production monitoring and alerting
+- [ ] Privacy policy publication
+- [ ] Terms of service
+- [ ] Security contact (security@baursoftware.com)
+
+### Integration with Launch Strategy
+
+**Soft Launch (Recommended):**
+- Start SOC2 observation period during beta (Month 1)
+- Collect evidence throughout beta and public launch
+- Complete Type II audit after 6-12 months
+- Target Enterprise customers after certification
+
+**Timeline:**
+- Month 1-3: Beta + evidence collection start
+- Month 4-9: Public launch + continued evidence collection
+- Month 10-11: External audit
+- Month 12: SOC2 Type II certification
+- Month 13+: Enterprise sales with certification
+
+### Cost Considerations
+
+**Added to Launch Budget:**
+- External audit: $15,000 - $25,000
+- Monitoring tools: $2,000/year
+- Staff time: ~200 hours/year
+- **Total:** ~$20,000-$30,000 (first year)
+
+**ROI:**
+- Enables Enterprise tier ($99/month vs $39/month)
+- Reduces sales cycle for enterprise deals
+- Higher close rates with certified compliance
+- Supports 5+ Enterprise customers = $5,940/year
+- Payback in 4-5 Enterprise customers
+
+### Priority Action Items
+
+**Before Soft Launch (Week 1):**
+1. Set up evidence collection repository
+2. Document current security controls
+3. Establish access logging
+
+**During Beta (Month 1-3):**
+4. Complete Q1 access review
+5. Start quarterly control testing
+6. Collect all required evidence
+
+**Before Public Launch (Month 4):**
+7. Publish privacy policy
+8. Publish terms of service
+9. Set up security contact email
+10. Document incident response procedures
+
+### Enterprise Customer Requirements
+
+**Common Enterprise Questions:**
+- Do you have SOC2 certification? (In Progress - Type II 2025)
+- What is your security architecture? (Documented)
+- How do you handle data breaches? (Need: Incident Response Policy)
+- Do you have penetration testing? (Planned Q3 2025)
+- What are your data retention policies? (Need: Documentation)
+- Do you support SSO/SAML? (Roadmap item)
+- What is your SLA? (Need: Definition for Enterprise tier)
+
+**Readiness Checklist:**
+- [x] Security documentation published
+- [x] Automated security testing
+- [ ] SOC2 Type II in progress (evidence of commitment)
+- [ ] Privacy policy
+- [ ] Data processing agreement template
+- [ ] Security questionnaire template (self-assessment)
+- [ ] Enterprise support SLA defined
+
+### Launch Strategy Impact
+
+**Free/Pro Launch (No Impact):**
+- SOC2 optional for small business customers
+- Can launch without certification
+- Start observation period in parallel
+
+**Enterprise Launch (Required):**
+- Delay Enterprise tier until Type II complete (Month 12+)
+- OR: Market as "Type II in progress" (Month 1-12)
+- Provide Type I documentation to prospects
+- Offer early adopter pricing during certification period
+
+**Recommendation:**
+1. Launch Free/Pro tiers immediately (Soft Launch)
+2. Start SOC2 Type II observation period (Day 1)
+3. Market "SOC2 Type II in progress" to Enterprise prospects
+4. Offer 20% discount to early Enterprise customers
+5. Full Enterprise launch after certification (Month 12+)
+
+---
+
+**Last Updated:** 2025-11-04
 **Ready to Launch:** After license server setup (4-6 hours remaining)
+**SOC2 Status:** Type II observation period starting 2025-01-01
