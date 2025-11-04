@@ -92,12 +92,17 @@ final class HubSpot_Ecommerce {
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-invoice-manager.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/webhooks/class-payment-webhook.php';
 
+        // Privacy and compliance classes
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-data-cleanup.php';
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-gdpr-handler.php';
+
         // Admin classes
         if (is_admin()) {
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-admin.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-settings.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-setup-wizard.php';
             require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-product-meta-boxes.php';
+            require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/admin/class-privacy-tools.php';
 
             // Initialize OAuth client
             HubSpot_Ecommerce_OAuth_Client::instance();
@@ -121,10 +126,15 @@ final class HubSpot_Ecommerce {
         HubSpot_Ecommerce_Invoice_Manager::instance();
         HubSpot_Ecommerce_Payment_Webhook::instance();
 
+        // Initialize privacy and compliance components
+        HubSpot_Ecommerce_Data_Cleanup::instance();
+        HubSpot_Ecommerce_GDPR_Handler::instance();
+
         if (is_admin()) {
             HubSpot_Ecommerce_Admin::instance();
             HubSpot_Ecommerce_Setup_Wizard::instance();
             HubSpot_Ecommerce_Product_Meta_Boxes::instance();
+            HubSpot_Ecommerce_Privacy_Tools::instance();
         } else {
             HubSpot_Ecommerce_Frontend::instance();
         }
@@ -248,6 +258,9 @@ final class HubSpot_Ecommerce {
      */
     public function deactivate() {
         flush_rewrite_rules();
+
+        // Unschedule cleanup tasks
+        HubSpot_Ecommerce_Data_Cleanup::unschedule_cleanups();
     }
 
     /**
@@ -272,11 +285,33 @@ final class HubSpot_Ecommerce {
             updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY session_id (session_id),
-            KEY product_id (product_id)
+            KEY product_id (product_id),
+            KEY created_at (created_at)
         ) $charset_collate;";
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+
+        // Audit log table for compliance tracking
+        $audit_table = $wpdb->prefix . 'hubspot_audit_log';
+
+        $audit_sql = "CREATE TABLE IF NOT EXISTS $audit_table (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) unsigned DEFAULT NULL,
+            action varchar(100) NOT NULL,
+            object_type varchar(50) DEFAULT NULL,
+            object_id bigint(20) unsigned DEFAULT NULL,
+            details text,
+            ip_address varchar(45) DEFAULT NULL,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY action (action),
+            KEY created_at (created_at),
+            KEY object_type (object_type)
+        ) $charset_collate;";
+
+        dbDelta($audit_sql);
     }
 
     /**

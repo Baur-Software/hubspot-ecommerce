@@ -38,6 +38,35 @@ $product_manager = HubSpot_Ecommerce_Product_Manager::instance();
             </a>
         </div>
 
+        <div class="account-privacy">
+            <h2><?php _e('Privacy & Data', 'hubspot-ecommerce'); ?></h2>
+
+            <p><?php _e('Manage your personal data and privacy preferences.', 'hubspot-ecommerce'); ?></p>
+
+            <div class="privacy-actions">
+                <a href="<?php echo esc_url(rest_url('hubspot-ecommerce/v1/gdpr/export')); ?>"
+                   class="button button-secondary"
+                   target="_blank">
+                    <?php _e('Download My Data', 'hubspot-ecommerce'); ?>
+                </a>
+
+                <button type="button"
+                        class="button button-link-delete"
+                        id="request-data-deletion"
+                        style="margin-top: 0.5rem;">
+                    <?php _e('Request Data Deletion', 'hubspot-ecommerce'); ?>
+                </button>
+            </div>
+
+            <p class="description">
+                <?php _e('Your data is handled according to our', 'hubspot-ecommerce'); ?>
+                <a href="<?php echo esc_url(get_privacy_policy_url()); ?>" target="_blank">
+                    <?php _e('Privacy Policy', 'hubspot-ecommerce'); ?>
+                </a>.
+                <?php _e('Data retention: Cart (30 days), Orders (7 years).', 'hubspot-ecommerce'); ?>
+            </p>
+        </div>
+
         <div class="account-orders">
             <h2><?php _e('Recent Orders', 'hubspot-ecommerce'); ?></h2>
 
