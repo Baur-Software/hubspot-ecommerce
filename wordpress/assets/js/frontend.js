@@ -12,19 +12,20 @@
             this.removeFromCart();
             this.processCheckout();
             this.updateCartCount();
-            this.handleDataDeletion();
         },
 
         /**
          * Add to cart
          */
         addToCart: function() {
-            $(document).on('click', '.add-to-cart, .add-to-cart-quick', function(e) {
+            $(document).on('click', '.add-to-cart, .add-to-cart-quick, .hs-add-to-cart-checkout, .hs-buy-button', function(e) {
                 e.preventDefault();
 
                 var $button = $(this);
                 var productId = $button.data('product-id') || $button.closest('form').data('product-id');
                 var quantity = 1;
+                var redirectToCheckout = $button.hasClass('hs-add-to-cart-checkout');
+                var originalButtonText = $button.find('.button-text').text() || $button.text();
 
                 // If from product page form, get quantity
                 if ($button.hasClass('add-to-cart')) {
@@ -32,7 +33,21 @@
                     quantity = parseInt($form.find('input[name="quantity"]').val()) || 1;
                 }
 
-                $button.prop('disabled', true).text(hubspotEcommerce.adding || 'Adding...');
+                // If from buy button wrapper with quantity input
+                var $wrapper = $button.closest('.hs-buy-button-wrapper');
+                if ($wrapper.length) {
+                    var $quantityInput = $wrapper.find('.hs-quantity-input');
+                    if ($quantityInput.length) {
+                        quantity = parseInt($quantityInput.val()) || 1;
+                    }
+                }
+
+                $button.prop('disabled', true);
+                if ($button.find('.button-text').length) {
+                    $button.find('.button-text').text(hubspotEcommerce.adding || 'Adding...');
+                } else {
+                    $button.text(hubspotEcommerce.adding || 'Adding...');
+                }
 
                 $.ajax({
                     url: hubspotEcommerce.ajax_url,
@@ -48,20 +63,49 @@
                             HubSpotEcommerce.showMessage($button, 'success', response.data.message || 'Added to cart!');
                             HubSpotEcommerce.updateCartCount(response.data.cart_count);
 
-                            // Update button text
-                            $button.text(hubspotEcommerce.added || 'Added!');
+                            // If redirect to checkout flag is set, redirect after adding
+                            if (redirectToCheckout) {
+                                if ($button.find('.button-text').length) {
+                                    $button.find('.button-text').text('Redirecting...');
+                                } else {
+                                    $button.text('Redirecting...');
+                                }
+                                window.location.href = '/checkout/';
+                            } else {
+                                // Update button text
+                                if ($button.find('.button-text').length) {
+                                    $button.find('.button-text').text(hubspotEcommerce.added || 'Added!');
+                                } else {
+                                    $button.text(hubspotEcommerce.added || 'Added!');
+                                }
 
-                            setTimeout(function() {
-                                $button.prop('disabled', false).text(hubspotEcommerce.add_to_cart || 'Add to Cart');
-                            }, 2000);
+                                setTimeout(function() {
+                                    $button.prop('disabled', false);
+                                    if ($button.find('.button-text').length) {
+                                        $button.find('.button-text').text(originalButtonText);
+                                    } else {
+                                        $button.text(originalButtonText);
+                                    }
+                                }, 2000);
+                            }
                         } else {
                             HubSpotEcommerce.showMessage($button, 'error', response.data.message || 'Error adding to cart');
-                            $button.prop('disabled', false).text(hubspotEcommerce.add_to_cart || 'Add to Cart');
+                            $button.prop('disabled', false);
+                            if ($button.find('.button-text').length) {
+                                $button.find('.button-text').text(originalButtonText);
+                            } else {
+                                $button.text(originalButtonText);
+                            }
                         }
                     },
                     error: function() {
                         HubSpotEcommerce.showMessage($button, 'error', 'Error adding to cart');
-                        $button.prop('disabled', false).text(hubspotEcommerce.add_to_cart || 'Add to Cart');
+                        $button.prop('disabled', false);
+                        if ($button.find('.button-text').length) {
+                            $button.find('.button-text').text(originalButtonText);
+                        } else {
+                            $button.text(originalButtonText);
+                        }
                     }
                 });
             });
@@ -193,11 +237,30 @@
         },
 
         /**
-         * Update cart count in header
+         * Update cart count in header and floating widget
          */
         updateCartCount: function(count) {
             if (typeof count !== 'undefined') {
+                // Update inline badge (legacy)
                 $('.hubspot-cart-count').text(count);
+
+                // Update floating cart widget
+                var $floatingCart = $('#hs-floating-cart');
+                var $badge = $floatingCart.find('.hs-cart-count-badge');
+
+                $badge.text(count);
+
+                // Show/hide widget based on count
+                if (count > 0) {
+                    $floatingCart.removeClass('hidden');
+                    // Add pulse animation when items are added
+                    $floatingCart.addClass('pulse');
+                    setTimeout(function() {
+                        $floatingCart.removeClass('pulse');
+                    }, 500);
+                } else {
+                    $floatingCart.addClass('hidden');
+                }
             }
         },
 
@@ -251,63 +314,54 @@
          * Format price
          */
         formatPrice: function(amount) {
-            var symbols = {
-                'USD': '$',
-                'EUR': '€',
-                'GBP': '£',
-                'JPY': '¥'
+            // Comprehensive currency formatting data
+            var currencyData = {
+                'USD': {symbol: '$', decimals: 2, position: 'before'},
+                'EUR': {symbol: '€', decimals: 2, position: 'before'},
+                'GBP': {symbol: '£', decimals: 2, position: 'before'},
+                'JPY': {symbol: '¥', decimals: 0, position: 'before'},
+                'AUD': {symbol: '$', decimals: 2, position: 'before'},
+                'CAD': {symbol: '$', decimals: 2, position: 'before'},
+                'CHF': {symbol: 'Fr', decimals: 2, position: 'before'},
+                'CNY': {symbol: '¥', decimals: 2, position: 'before'},
+                'SEK': {symbol: 'kr', decimals: 2, position: 'after'},
+                'NZD': {symbol: '$', decimals: 2, position: 'before'},
+                'MXN': {symbol: '$', decimals: 2, position: 'before'},
+                'SGD': {symbol: '$', decimals: 2, position: 'before'},
+                'HKD': {symbol: '$', decimals: 2, position: 'before'},
+                'NOK': {symbol: 'kr', decimals: 2, position: 'after'},
+                'KRW': {symbol: '₩', decimals: 0, position: 'before'},
+                'TRY': {symbol: '₺', decimals: 2, position: 'before'},
+                'RUB': {symbol: '₽', decimals: 2, position: 'after'},
+                'INR': {symbol: '₹', decimals: 2, position: 'before'},
+                'BRL': {symbol: 'R$', decimals: 2, position: 'before'},
+                'ZAR': {symbol: 'R', decimals: 2, position: 'before'},
+                'DKK': {symbol: 'kr', decimals: 2, position: 'after'},
+                'PLN': {symbol: 'zł', decimals: 2, position: 'after'},
+                'THB': {symbol: '฿', decimals: 2, position: 'before'},
+                'IDR': {symbol: 'Rp', decimals: 0, position: 'before'},
+                'HUF': {symbol: 'Ft', decimals: 0, position: 'after'},
+                'CZK': {symbol: 'Kč', decimals: 2, position: 'after'},
+                'ILS': {symbol: '₪', decimals: 2, position: 'before'},
+                'CLP': {symbol: '$', decimals: 0, position: 'before'},
+                'PHP': {symbol: '₱', decimals: 2, position: 'before'},
+                'AED': {symbol: 'د.إ', decimals: 2, position: 'before'},
+                'COP': {symbol: '$', decimals: 0, position: 'before'},
+                'SAR': {symbol: '﷼', decimals: 2, position: 'before'},
+                'MYR': {symbol: 'RM', decimals: 2, position: 'before'},
+                'RON': {symbol: 'lei', decimals: 2, position: 'after'}
             };
 
             var currency = hubspotEcommerce.currency || 'USD';
-            var symbol = symbols[currency] || currency + ' ';
+            var data = currencyData[currency] || {symbol: currency + ' ', decimals: 2, position: 'before'};
 
-            return symbol + parseFloat(amount).toFixed(2);
-        },
+            var formattedNumber = parseFloat(amount).toFixed(data.decimals);
 
-        /**
-         * Handle data deletion request
-         */
-        handleDataDeletion: function() {
-            $('#request-data-deletion').on('click', function(e) {
-                e.preventDefault();
-
-                var confirmMessage = 'Are you sure you want to request deletion of all your personal data?\n\n' +
-                                   'This action includes:\n' +
-                                   '- Your account information\n' +
-                                   '- Shopping cart data\n' +
-                                   '- Email preferences\n\n' +
-                                   'Note: Order records required by law will be retained with anonymized customer information.\n\n' +
-                                   'You will receive a confirmation email to complete this request.';
-
-                if (!confirm(confirmMessage)) {
-                    return;
-                }
-
-                var $button = $(this);
-                $button.prop('disabled', true).text('Processing...');
-
-                $.ajax({
-                    url: hubspotEcommerce.rest_url + 'hubspot-ecommerce/v1/gdpr/delete-request',
-                    type: 'POST',
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader('X-WP-Nonce', hubspotEcommerce.rest_nonce);
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            alert('Deletion request sent!\n\nPlease check your email and follow the confirmation link to complete the deletion process.');
-                            $button.text('Request Sent');
-                        } else {
-                            alert('Failed to send deletion request. Please try again or contact support.');
-                            $button.prop('disabled', false).text('Request Data Deletion');
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error('Deletion request error:', xhr);
-                        alert('Failed to send deletion request. Please try again or contact support.');
-                        $button.prop('disabled', false).text('Request Data Deletion');
-                    }
-                });
-            });
+            if (data.position === 'before') {
+                return data.symbol + formattedNumber;
+            } else {
+                return formattedNumber + ' ' + data.symbol;
+            }
         }
     };
 

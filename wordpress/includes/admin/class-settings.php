@@ -43,12 +43,35 @@ class HubSpot_Ecommerce_Settings {
         register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_cart_page');
         register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_checkout_page');
         register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_account_page');
+
+        // Floating Cart Widget Settings
+        register_setting('hubspot_ecommerce_settings', 'hubspot_ecommerce_cart_icon');
     }
 
     /**
      * Render settings page
      */
     public function render() {
+        // Handle currency sync action
+        if (isset($_GET['action']) && $_GET['action'] === 'sync_currencies') {
+            $currency_manager = HubSpot_Ecommerce_Currency_Manager::instance();
+            $results = $currency_manager->sync_currencies();
+
+            if (empty($results['errors'])) {
+                echo '<div class="notice notice-success is-dismissible"><p>';
+                printf(
+                    __('Successfully synced %d currencies from HubSpot. Company currency: %s', 'hubspot-ecommerce'),
+                    count($results['enabled_currencies']),
+                    $results['company_currency']
+                );
+                echo '</p></div>';
+            } else {
+                echo '<div class="notice notice-error is-dismissible"><p>';
+                echo esc_html(__('Errors syncing currencies:', 'hubspot-ecommerce') . ' ' . implode(', ', $results['errors']));
+                echo '</p></div>';
+            }
+        }
+
         if (isset($_POST['submit'])) {
             $this->save_settings();
         }
@@ -97,12 +120,46 @@ class HubSpot_Ecommerce_Settings {
                             <label for="currency"><?php _e('Currency', 'hubspot-ecommerce'); ?></label>
                         </th>
                         <td>
+                            <?php
+                            $currency_manager = HubSpot_Ecommerce_Currency_Manager::instance();
+                            $enabled_currencies = $currency_manager->get_enabled_currencies();
+                            $all_currency_data = $currency_manager->get_all_currency_data();
+                            ?>
                             <select id="currency" name="hubspot_ecommerce_currency">
-                                <option value="USD" <?php selected($currency, 'USD'); ?>>USD - US Dollar</option>
-                                <option value="EUR" <?php selected($currency, 'EUR'); ?>>EUR - Euro</option>
-                                <option value="GBP" <?php selected($currency, 'GBP'); ?>>GBP - British Pound</option>
-                                <option value="JPY" <?php selected($currency, 'JPY'); ?>>JPY - Japanese Yen</option>
+                                <?php foreach ($enabled_currencies as $curr): ?>
+                                    <?php
+                                    $code = $curr['code'];
+                                    $name = isset($all_currency_data[$code]) ? $all_currency_data[$code]['name'] : $code;
+                                    $symbol = isset($all_currency_data[$code]) ? $all_currency_data[$code]['symbol'] : $code;
+                                    ?>
+                                    <option value="<?php echo esc_attr($code); ?>" <?php selected($currency, $code); ?>>
+                                        <?php echo esc_html($code . ' - ' . $name . ' (' . $symbol . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
+                            <p class="description">
+                                <?php _e('Default currency for product pricing. Synced from your HubSpot account.', 'hubspot-ecommerce'); ?>
+                                <br>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=hubspot-ecommerce-settings&action=sync_currencies')); ?>" class="button button-small" style="margin-top: 5px;">
+                                    <?php _e('Sync Currencies from HubSpot', 'hubspot-ecommerce'); ?>
+                                </a>
+                            </p>
+                            <?php
+                            // Show last sync info
+                            $last_sync = get_option('hubspot_ecommerce_currency_sync');
+                            if ($last_sync && isset($last_sync['timestamp'])):
+                            ?>
+                                <p class="description" style="margin-top: 10px;">
+                                    <strong><?php _e('Last synced:', 'hubspot-ecommerce'); ?></strong>
+                                    <?php echo esc_html($last_sync['timestamp']); ?>
+                                    <br>
+                                    <strong><?php _e('Company currency:', 'hubspot-ecommerce'); ?></strong>
+                                    <?php echo esc_html($last_sync['company_currency'] ?? 'N/A'); ?>
+                                    <br>
+                                    <strong><?php _e('Enabled currencies:', 'hubspot-ecommerce'); ?></strong>
+                                    <?php echo esc_html($last_sync['enabled_count'] ?? 0); ?>
+                                </p>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 </table>
@@ -251,6 +308,52 @@ class HubSpot_Ecommerce_Settings {
                     <?php endforeach; ?>
                 </table>
 
+                <h2><?php _e('Floating Cart Widget', 'hubspot-ecommerce'); ?></h2>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="cart_icon"><?php _e('Cart Icon', 'hubspot-ecommerce'); ?></label>
+                        </th>
+                        <td>
+                            <?php
+                            $cart_icon = get_option('hubspot_ecommerce_cart_icon', 'shopping-cart');
+                            $available_icons = [
+                                'shopping-cart' => __('Shopping Cart (default)', 'hubspot-ecommerce'),
+                                'cart-plus' => __('Cart Plus', 'hubspot-ecommerce'),
+                                'cart-arrow-down' => __('Cart Arrow Down', 'hubspot-ecommerce'),
+                                'shopping-bag' => __('Shopping Bag', 'hubspot-ecommerce'),
+                                'shopping-basket' => __('Shopping Basket', 'hubspot-ecommerce'),
+                            ];
+                            ?>
+                            <select id="cart_icon" name="hubspot_ecommerce_cart_icon">
+                                <?php foreach ($available_icons as $icon_key => $icon_label): ?>
+                                    <option value="<?php echo esc_attr($icon_key); ?>" <?php selected($cart_icon, $icon_key); ?>>
+                                        <?php echo esc_html($icon_label); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description">
+                                <?php _e('Select the icon to display in the floating cart widget. Uses Font Awesome icons from GeneratePress theme.', 'hubspot-ecommerce'); ?>
+                            </p>
+                            <div style="margin-top: 15px;">
+                                <strong><?php _e('Preview:', 'hubspot-ecommerce'); ?></strong><br>
+                                <div style="margin-top: 10px; display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <?php foreach ($available_icons as $icon_key => $icon_label): ?>
+                                        <div style="text-align: center;">
+                                            <div style="display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; background: #3498db; color: white; border-radius: 50%; margin-bottom: 5px;">
+                                                <i class="fa fa-<?php echo esc_attr($icon_key); ?>" style="font-size: 20px;"></i>
+                                            </div>
+                                            <div style="font-size: 11px; color: #666;">
+                                                <?php echo esc_html(str_replace(' (default)', '', $icon_label)); ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
                 <?php submit_button(); ?>
             </form>
         </div>
@@ -312,6 +415,7 @@ class HubSpot_Ecommerce_Settings {
             'hubspot_ecommerce_cart_page',
             'hubspot_ecommerce_checkout_page',
             'hubspot_ecommerce_account_page',
+            'hubspot_ecommerce_cart_icon',
         ];
 
         // Add API key to settings if pro feature is enabled

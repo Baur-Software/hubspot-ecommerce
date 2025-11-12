@@ -293,24 +293,36 @@ class HubSpot_Ecommerce_API {
      */
     public function get_products($limit = 100, $after = null) {
         $endpoint = '/crm/v3/objects/products';
+
+        // Build properties list including currency-specific prices
+        $properties = [
+            'name',
+            'description',
+            'price',
+            'hs_sku',
+            'hs_cost_of_goods_sold',
+            'hs_images',
+            'hs_url',
+            'createdate',
+            'hs_product_type',
+            // Subscription/recurring billing properties
+            'hs_recurring_billing_period',
+            'recurringbillingfrequency',
+            'hs_billing_period_units',
+            'hs_recurring_billing_start_date',
+        ];
+
+        // Add currency-specific price properties from enabled currencies
+        $currency_manager = HubSpot_Ecommerce_Currency_Manager::instance();
+        $enabled_currencies = $currency_manager->get_enabled_currencies();
+        foreach ($enabled_currencies as $currency) {
+            $code = strtolower($currency['code']);
+            $properties[] = "hs_price_{$code}";
+        }
+
         $query_args = [
             'limit' => $limit,
-            'properties' => implode(',', [
-                'name',
-                'description',
-                'price',
-                'hs_sku',
-                'hs_cost_of_goods_sold',
-                'hs_images',
-                'hs_url',
-                'createdate',
-                'hs_product_type',
-                // Subscription/recurring billing properties
-                'hs_recurring_billing_period',
-                'recurringbillingfrequency',
-                'hs_billing_period_units',
-                'hs_recurring_billing_start_date',
-            ]),
+            'properties' => implode(',', $properties),
         ];
 
         if ($after) {
@@ -327,6 +339,36 @@ class HubSpot_Ecommerce_API {
      */
     public function get_product($product_id) {
         $endpoint = "/crm/v3/objects/products/{$product_id}";
+        return $this->request($endpoint);
+    }
+
+    /**
+     * Get company (default) currency from HubSpot account
+     *
+     * @return array|WP_Error Currency data or error
+     */
+    public function get_company_currency() {
+        $endpoint = '/settings/v3/currencies/company-currency';
+        return $this->request($endpoint);
+    }
+
+    /**
+     * Get all enabled currencies with current exchange rates
+     *
+     * @return array|WP_Error Array of currencies or error
+     */
+    public function get_account_currencies() {
+        $endpoint = '/settings/v3/currencies/exchange-rates/current';
+        return $this->request($endpoint);
+    }
+
+    /**
+     * Get list of all supported currency codes from HubSpot
+     *
+     * @return array|WP_Error Array of currency codes or error
+     */
+    public function get_supported_currency_codes() {
+        $endpoint = '/settings/v3/currencies/codes';
         return $this->request($endpoint);
     }
 

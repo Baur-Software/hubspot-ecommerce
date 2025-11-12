@@ -84,6 +84,7 @@ final class HubSpot_Ecommerce {
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-oauth-client.php';
 
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-hubspot-api.php';
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-currency-manager.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-product-manager.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-cart.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-checkout.php';
@@ -118,6 +119,7 @@ final class HubSpot_Ecommerce {
         HubSpot_Ecommerce_License_Manager::instance(); // Initialize license manager FIRST (feature gating)
         HubSpot_Ecommerce_Mock_API::instance(); // Initialize mock API second (checks for demo mode)
         HubSpot_Ecommerce_API::instance();
+        HubSpot_Ecommerce_Currency_Manager::instance();
         HubSpot_Ecommerce_Product_Manager::instance();
         HubSpot_Ecommerce_Cart::instance();
         HubSpot_Ecommerce_Checkout::instance();

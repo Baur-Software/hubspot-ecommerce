@@ -13,6 +13,7 @@ class HubSpot_Ecommerce_Product_Manager {
 
     private static $instance = null;
     private $api;
+    private $currency_manager;
 
     public static function instance() {
         if (is_null(self::$instance)) {
@@ -23,6 +24,7 @@ class HubSpot_Ecommerce_Product_Manager {
 
     private function __construct() {
         $this->api = HubSpot_Ecommerce_API::instance();
+        $this->currency_manager = HubSpot_Ecommerce_Currency_Manager::instance();
 
         // Schedule product sync
         add_action('hubspot_ecommerce_sync_products', [$this, 'sync_products']);
@@ -132,6 +134,21 @@ class HubSpot_Ecommerce_Product_Manager {
         update_post_meta($post_id, '_sku', sanitize_text_field($properties['hs_sku'] ?? ''));
         update_post_meta($post_id, '_cost_of_goods', floatval($properties['hs_cost_of_goods_sold'] ?? 0));
         update_post_meta($post_id, '_product_type', sanitize_text_field($properties['hs_product_type'] ?? 'simple'));
+
+        // Save currency-specific prices from HubSpot
+        $enabled_currencies = $this->currency_manager->get_enabled_currencies();
+        foreach ($enabled_currencies as $currency) {
+            $code = strtolower($currency['code']);
+            $price_field = "hs_price_{$code}";
+
+            if (isset($properties[$price_field]) && !empty($properties[$price_field])) {
+                // Store currency-specific price
+                update_post_meta($post_id, "_price_{$code}", floatval($properties[$price_field]));
+            } else {
+                // Remove meta if price not set in HubSpot
+                delete_post_meta($post_id, "_price_{$code}");
+            }
+        }
 
         // Save subscription/recurring billing info
         if (!empty($properties['hs_recurring_billing_period'])) {
@@ -323,10 +340,70 @@ class HubSpot_Ecommerce_Product_Manager {
     }
 
     /**
-     * Get product price
+     * Get product price in specific currency
+     *
+     * @param int $post_id Product post ID
+     * @param string $currency_code Optional currency code (defaults to site setting)
+     * @return float Price in requested currency
      */
-    public function get_product_price($post_id) {
+    public function get_product_price($post_id, $currency_code = null) {
+        // If no currency specified, use site default
+        if (is_null($currency_code)) {
+            $currency_code = get_option('hubspot_ecommerce_currency', 'USD');
+        }
+
+        // Try to get currency-specific price
+        $code = strtolower($currency_code);
+        $currency_price = get_post_meta($post_id, "_price_{$code}", true);
+
+        if (!empty($currency_price)) {
+            return floatval($currency_price);
+        }
+
+        // Fallback to default price
         return floatval(get_post_meta($post_id, '_price', true));
+    }
+
+    /**
+     * Get all available prices for a product across all currencies
+     *
+     * @param int $post_id Product post ID
+     * @return array Array of currency code => price
+     */
+    public function get_product_prices_all_currencies($post_id) {
+        $prices = [];
+
+        // Get default price
+        $default_price = floatval(get_post_meta($post_id, '_price', true));
+        $default_currency = get_option('hubspot_ecommerce_currency', 'USD');
+        $prices[strtoupper($default_currency)] = $default_price;
+
+        // Get currency-specific prices
+        $enabled_currencies = $this->currency_manager->get_enabled_currencies();
+        foreach ($enabled_currencies as $currency) {
+            $code = $currency['code'];
+            $code_lower = strtolower($code);
+            $currency_price = get_post_meta($post_id, "_price_{$code_lower}", true);
+
+            if (!empty($currency_price)) {
+                $prices[$code] = floatval($currency_price);
+            }
+        }
+
+        return $prices;
+    }
+
+    /**
+     * Check if product has price for specific currency
+     *
+     * @param int $post_id Product post ID
+     * @param string $currency_code Currency code to check
+     * @return bool True if price exists for currency
+     */
+    public function has_currency_price($post_id, $currency_code) {
+        $code = strtolower($currency_code);
+        $price = get_post_meta($post_id, "_price_{$code}", true);
+        return !empty($price);
     }
 
     /**
@@ -344,20 +421,14 @@ class HubSpot_Ecommerce_Product_Manager {
     }
 
     /**
-     * Format price for display
+     * Format price for display using Currency Manager
+     *
+     * @param float $price Price to format
+     * @param string $currency_code Optional currency code (defaults to site setting)
+     * @return string Formatted price with proper symbol, decimals, and separators
      */
-    public function format_price($price) {
-        $currency = get_option('hubspot_ecommerce_currency', 'USD');
-        $currency_symbols = [
-            'USD' => '$',
-            'EUR' => '€',
-            'GBP' => '£',
-            'JPY' => '¥',
-        ];
-
-        $symbol = isset($currency_symbols[$currency]) ? $currency_symbols[$currency] : $currency . ' ';
-
-        return $symbol . number_format($price, 2);
+    public function format_price($price, $currency_code = null) {
+        return $this->currency_manager->format_price($price, $currency_code);
     }
 
     /**
