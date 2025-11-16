@@ -553,31 +553,6 @@ class HubSpot_Ecommerce_Admin {
                 </form>
             </div>
             <?php endif; ?>
-
-            <!-- Feature Comparison -->
-            <div class="card" style="max-width: 900px; margin-top: 20px;">
-                <h2><?php _e('Feature Comparison', 'hubspot-ecommerce'); ?></h2>
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;"><?php _e('Feature', 'hubspot-ecommerce'); ?></th>
-                            <th><?php _e('Free', 'hubspot-ecommerce'); ?></th>
-                            <th><?php _e('Pro', 'hubspot-ecommerce'); ?></th>
-                            <th><?php _e('Enterprise', 'hubspot-ecommerce'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($license->get_feature_comparison() as $row): ?>
-                        <tr>
-                            <td><strong><?php echo esc_html($row['feature']); ?></strong></td>
-                            <td><?php echo esc_html($row['free']); ?></td>
-                            <td><?php echo esc_html($row['pro']); ?></td>
-                            <td><?php echo esc_html($row['enterprise']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
         </div>
         <?php
     }

@@ -193,6 +193,8 @@ class HubSpot_Ecommerce_OAuth_Client {
             'crm.objects.line_items.read',
             'crm.objects.line_items.write',
             'crm.schemas.line_items.read',
+            'crm.objects.invoices.read',
+            'crm.objects.invoices.write',
             'e-commerce',
             'oauth'
         ]);
