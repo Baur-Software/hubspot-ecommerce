@@ -77,17 +77,17 @@ final class HubSpot_Ecommerce {
         // Mock API for demo mode
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-mock-hubspot-api.php';
 
-        // License Manager (loads FIRST - needed for feature gating)
-        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-license-manager.php';
+        // OAuth client (loads FIRST - needed by validator)
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-oauth-client.php';
 
-        // License Validator Service (standalone validation logic)
+        // License Validator Service (standalone validation logic, needs OAuth client)
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-license-validator.php';
 
         // License API (REST endpoint for validating licenses)
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-license-api.php';
 
-        // OAuth client (loads second - needed for API authentication)
-        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-oauth-client.php';
+        // License Manager (loads after validator - needed for feature gating)
+        require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-license-manager.php';
 
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-hubspot-api.php';
         require_once HUBSPOT_ECOMMERCE_PLUGIN_DIR . 'includes/class-currency-manager.php';
