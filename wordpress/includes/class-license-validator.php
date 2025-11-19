@@ -260,7 +260,7 @@ class HubSpot_Ecommerce_License_Validator {
 
     /**
      * Get access token for HubSpot API
-     * Leverages the official HubSpot (leadin) plugin's OAuth connection
+     * Uses our OAuth client which handles token refresh automatically
      *
      * @return string|null Access token
      */
@@ -270,24 +270,15 @@ class HubSpot_Ecommerce_License_Validator {
             return HUBSPOT_LICENSE_PRIVATE_APP_TOKEN;
         }
 
-        // Use the official HubSpot plugin's OAuth connection if available
-        if (class_exists('Leadin_OAuth')) {
-            $leadin_oauth = Leadin_OAuth::get_instance();
-            if (method_exists($leadin_oauth, 'get_access_token')) {
-                $token = $leadin_oauth->get_access_token();
-                if (!empty($token)) {
-                    return $token;
-                }
+        // Use our OAuth client which handles token refresh
+        if (class_exists('HubSpot_Ecommerce_OAuth_Client')) {
+            $oauth_client = HubSpot_Ecommerce_OAuth_Client::instance();
+            if (method_exists($oauth_client, 'get_access_token')) {
+                return $oauth_client->get_access_token();
             }
         }
 
-        // Fallback: check if leadin stores access token in options
-        $leadin_access_token = get_option('leadin_access_token');
-        if (!empty($leadin_access_token)) {
-            return $leadin_access_token;
-        }
-
-        // Last resort: our own OAuth token (if we manage one separately)
+        // Fallback: direct from database (won't auto-refresh)
         return get_option('hubspot_oauth_access_token');
     }
 }
