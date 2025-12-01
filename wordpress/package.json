@@ -26,7 +26,7 @@
   "author": "",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@playwright/test": "^1.40.0",
+    "@playwright/test": "^1.57.0",
     "axios": "^1.12.2",
     "cypress": "^15.5.0",
     "js-yaml": "^4.1.0"
