@@ -1,0 +1,34 @@
+{
+  "name": "hubspot-ecommerce",
+  "version": "1.0.0",
+  "description": "HubSpot Ecommerce WordPress Plugin",
+  "scripts": {
+    "test": "playwright test",
+    "test:no-wp": "playwright test framework-test code-validation",
+    "test:e2e": "playwright test checkout-flow product-browsing security",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen https://hubspot-ecommerce-test.local",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "keywords": [
+    "wordpress",
+    "hubspot",
+    "ecommerce",
+    "plugin"
+  ],
+  "author": "",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "axios": "^1.12.2",
+    "cypress": "^15.5.0",
+    "js-yaml": "^4.1.0"
+  }
+}

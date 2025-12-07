@@ -1,0 +1,27 @@
+{
+  "name": "hubspot-ecommerce-monorepo",
+  "version": "1.0.0",
+  "description": "Complete HubSpot ecommerce integration for WordPress",
+  "private": true,
+  "workspaces": [
+    "wordpress",
+    "hubspot-app"
+  ],
+  "scripts": {
+    "test": "npm run test:wordpress && npm run test:hubspot",
+    "test:wordpress": "cd wordpress && npm test",
+    "test:hubspot": "cd hubspot-app && npm test",
+    "build": "npm run build:wordpress && npm run build:hubspot",
+    "build:wordpress": "cd wordpress && composer install && npm install",
+    "build:hubspot": "cd hubspot-app && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baursoftware/hubspot-ecommerce"
+  },
+  "author": "Baur Software",
+  "license": "GPL-2.0-or-later",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

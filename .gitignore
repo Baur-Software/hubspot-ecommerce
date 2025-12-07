@@ -1,0 +1,51 @@
+# Root-level ignores
+node_modules/
+*.log
+.DS_Store
+
+# Sensitive files - NEVER commit these
+.env
+.env.*
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+secrets.json
+*-credentials.*
+*-secrets.*
+
+# WordPress plugin
+wordpress/vendor/
+wordpress/composer.lock
+wordpress/node_modules/
+wordpress/playwright-report/
+wordpress/test-results/
+
+# HubSpot app
+hubspot-app/node_modules/
+hubspot-app/hubspot.config.yml
+hubspot-app/.env
+
+# Build artifacts
+*.zip
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Old files (keep for now)
+hubspot.config.yml

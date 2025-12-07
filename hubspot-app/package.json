@@ -1,0 +1,38 @@
+{
+  "name": "hubspot-ecommerce-app",
+  "version": "1.0.0",
+  "description": "HubSpot Marketplace companion app for WordPress ecommerce integration",
+  "private": true,
+  "scripts": {
+    "deploy:dev": "hs project upload",
+    "deploy:prod": "hs project upload --portal=production",
+    "validate": "hs project validate",
+    "watch": "hs project watch",
+    "test": "node test-all-scopes.js",
+    "test:oauth": "node oauth-test-flow.js",
+    "test:api": "node test-app-api.js",
+    "seed": "node seed-products.js"
+  },
+  "keywords": [
+    "hubspot",
+    "wordpress",
+    "ecommerce",
+    "oauth",
+    "marketplace"
+  ],
+  "author": "Baur Software",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baursoftware/hubspot-ecommerce-app"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

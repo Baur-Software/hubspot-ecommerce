@@ -1,0 +1,73 @@
+/**
+ * HubSpot Ecommerce Admin Styles
+ */
+
+.hubspot-dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.hubspot-card {
+    background: #fff;
+    padding: 1.5rem;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.hubspot-card h3 {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #646970;
+    font-weight: 600;
+}
+
+.hubspot-card-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1d2327;
+    margin-bottom: 1rem;
+}
+
+.hubspot-sync-container {
+    max-width: 600px;
+    padding: 2rem;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin: 2rem 0;
+}
+
+.hubspot-sync-container p {
+    margin-bottom: 1.5rem;
+}
+
+#hubspot-sync-progress progress {
+    height: 30px;
+    border-radius: 4px;
+}
+
+.form-table th {
+    padding: 20px 10px 20px 0;
+}
+
+.form-table td {
+    padding: 15px 10px;
+}
+
+.form-table input[type="text"],
+.form-table input[type="password"],
+.form-table input[type="email"],
+.form-table select {
+    width: 400px;
+    max-width: 100%;
+}
+
+.spinner {
+    float: none;
+    margin: 0 0 0 8px;
+    vertical-align: middle;
+}
