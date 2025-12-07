@@ -35,26 +35,26 @@ module.exports = {
             'crm.objects.line_items.read',
             'crm.objects.line_items.write',
             'crm.schemas.line_items.read',
+            'crm.objects.invoices.read',
+            'crm.objects.invoices.write',
             'e-commerce',
             'oauth'
         ]
     },
 
-    // Required scopes for validation
+    // Required scopes for validation (must match app-hsmeta.json requiredScopes)
     requiredScopes: [
-        'e-commerce',
         'crm.objects.contacts.read',
         'crm.objects.contacts.write',
         'crm.objects.deals.read',
         'crm.objects.deals.write',
         'crm.objects.line_items.read',
         'crm.objects.line_items.write',
-        'crm.objects.subscriptions.read',
-        'crm.objects.subscriptions.write',
+        'crm.schemas.line_items.read',
         'crm.objects.invoices.read',
         'crm.objects.invoices.write',
-        'communication_preferences.read',
-        'communication_preferences.write'
+        'e-commerce',
+        'oauth'
     ],
 
     // Validate required configuration
